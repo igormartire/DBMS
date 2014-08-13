@@ -82,7 +82,7 @@ public class Main {
         System.out.print("Entre com o nome do gerente: ");
         String gerente = scan.next();
         Agencia ag = new Agencia(cod,nome,gerente);
-        ag.salva();
+        //ag.salva();
     }
     
     private static void cadastraContaCorrente(){
