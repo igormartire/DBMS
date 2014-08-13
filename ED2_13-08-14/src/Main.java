@@ -50,7 +50,7 @@ public class Main {
         return op;
     }
 
-    private static void menuCadastro(){
+    private static void menuCadastro() throws IOException{
         Scanner scan = new Scanner(System.in);
         System.out.println("O que voce deseja cadastrar:\n"
                 + "1- Agencia\n"
@@ -73,7 +73,7 @@ public class Main {
         }
     }
     
-    private static void cadastraAgencia(){
+    private static void cadastraAgencia() throws IOException{
         Scanner scan = new Scanner(System.in);
         System.out.print("Entre com o codigo da agencia: ");
         int cod = scan.nextInt();
@@ -82,10 +82,10 @@ public class Main {
         System.out.print("Entre com o nome do gerente: ");
         String gerente = scan.next();
         Agencia ag = new Agencia(cod,nome,gerente);
-        //ag.salva();
+        ag.salva();
     }
     
-    private static void cadastraContaCorrente(){
+    private static void cadastraContaCorrente() throws IOException{
         Scanner scan = new Scanner(System.in);
         System.out.print("Entre com o codigo da conta corrente: ");
         int cod = scan.nextInt();
