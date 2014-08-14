@@ -51,6 +51,11 @@ public class Agencia {
         DataOutputStream out = null;
         try {
             out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("agencias.dat")));
+            
+            out.writeInt(this.cod);
+            out.writeChars(this.nome);
+            out.writeChars(this.gerente);
+            
         } catch (FileNotFoundException ex) {
             //NOTHING
         } finally {
