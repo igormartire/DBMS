@@ -15,6 +15,9 @@ import java.io.IOException;
  * @author Lucas
  */
 public class ContaCorrente {
+    
+    public static final String arquivoContas = "contas.dat";
+    
     private int cod;
     private int codAgencia;
     private double saldo;
@@ -44,7 +47,7 @@ public class ContaCorrente {
     void salva() throws IOException {
         DataOutputStream out = null;
         try {
-            out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("contascorrentes.dat")));
+            out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(arquivoContas, true)));
             
             out.writeInt(this.cod);
             out.writeInt(this.codAgencia);
