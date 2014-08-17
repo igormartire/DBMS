@@ -1,5 +1,11 @@
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /*
@@ -15,7 +21,11 @@ public class Main {
     /**
      * @param args the command line arguments
      */
+    
+    public static final String arquivoContas = "contas.dat";
+    
     public static void main(String[] args) throws IOException {
+        
         boolean sair = false;
 
         while (!sair) {
@@ -50,7 +60,7 @@ public class Main {
         return op;
     }
 
-    private static void menuCadastro() throws IOException{
+    private static void menuCadastro() throws IOException {
         Scanner scan = new Scanner(System.in);
         System.out.println("O que voce deseja cadastrar:\n"
                 + "1- Agencia\n"
@@ -86,6 +96,7 @@ public class Main {
     }
     
     private static void cadastraContaCorrente() throws IOException{
+        
         Scanner scan = new Scanner(System.in);
         System.out.print("Entre com o codigo da conta corrente: ");
         int cod = scan.nextInt();
@@ -94,6 +105,18 @@ public class Main {
         System.out.print("Entre com o saldo: ");
         double saldo = scan.nextDouble();
         ContaCorrente cc = new ContaCorrente(cod,codAgencia,saldo);
-        cc.salva();
+         
+        DataOutputStream out = null;
+        try {
+            out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(arquivoContas, true)));   
+            
+            cc.salva(out);
+        } catch (FileNotFoundException ex) {
+            //NOTHING
+        } finally {
+            if (out != null){
+                out.close();
+            }
+        }
     }
 }
