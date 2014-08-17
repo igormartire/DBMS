@@ -1,20 +1,14 @@
-
 import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- *
- * @author Lucas
- */
 public class ContaCorrente {
 
     private int cod;
     private int codAgencia;
     private double saldo;
+
+    public ContaCorrente(){}
 
     public ContaCorrente(int cod, int codAgencia, double saldo) {
         this.cod = cod;
@@ -42,6 +36,11 @@ public class ContaCorrente {
         out.writeInt(this.cod);
         out.writeInt(this.codAgencia);
         out.writeDouble(this.saldo);
-        System.out.println("Conta Corrente salva com sucesso!");
+    }
+
+    void le(DataInputStream in) throws IOException {
+        this.cod = in.readInt();
+        this.codAgencia = in.readInt();
+        this.saldo = in.readDouble();
     }
 }

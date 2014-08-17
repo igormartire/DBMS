@@ -1,23 +1,13 @@
-
-import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author Lucas
- */
 public class Agencia {
     private int cod;
     private String nome;
     private String gerente;
+
+    public Agencia(){}
 
     public Agencia(int cod, String nome, String gerente) {
         this.cod = cod;
@@ -45,24 +35,16 @@ public class Agencia {
         this.gerente = gerente;
     }
 
-    void salva() throws IOException{
-        DataOutputStream out = null;
-        try {
-            out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream("agencias.dat")));
-            
-            out.writeInt(this.cod);
-            out.writeChars(this.nome);
-            out.writeChars(this.gerente);
-            
-        } catch (FileNotFoundException ex) {
-            //NOTHING
-        } finally {
-            if (out != null){
-                out.close();
-            }
-        }
+    public void salva(DataOutputStream out) throws IOException {
+        out.writeInt(this.cod);
+        out.writeUTF(this.nome);
+        out.writeUTF(this.gerente);
     }
     
-    
+    public void le(DataInputStream in) throws IOException {
+        this.cod = in.readInt();
+        this.nome = in.readUTF();
+        this.gerente = in.readUTF();
+    }
     
 }
