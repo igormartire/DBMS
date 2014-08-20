@@ -329,7 +329,7 @@ public class BalanceLineTest {
 
         saida = Arquivos.leCliente(NOME_ARQUIVO_SAIDA);
         erros = Arquivos.leTransacao(NOME_ARQUIVO_ERROS);
-
+        
         assertArrayEquals(oraculoSaida.toArray(), saida.toArray());
         assertArrayEquals(oraculoErros.toArray(), erros.toArray());
     }

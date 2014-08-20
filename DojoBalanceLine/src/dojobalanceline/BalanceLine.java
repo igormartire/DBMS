@@ -1,5 +1,6 @@
 package dojobalanceline;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -19,11 +20,11 @@ public class BalanceLine {
     public void executa(String nomeArquivoMestre, String nomeArquivoTransacao,
             String nomeArquivoSaida, String nomeArquivoErros) throws Exception {
 
-        DataInputStream inTransacao = new DataInputStream(new FileInputStream(nomeArquivoTransacao));
-        DataInputStream inMestre = new DataInputStream(new FileInputStream(nomeArquivoMestre));
+        DataInputStream inTransacao = new DataInputStream(new BufferedInputStream(new FileInputStream(nomeArquivoTransacao)));
+        DataInputStream inMestre = new DataInputStream(new BufferedInputStream(new FileInputStream(nomeArquivoMestre)));
 
-        DataOutputStream outSaida = new DataOutputStream(new FileOutputStream(nomeArquivoSaida));
-        DataOutputStream outErro = new DataOutputStream(new FileOutputStream(nomeArquivoErros));
+        DataOutputStream outSaida = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nomeArquivoSaida)));
+        DataOutputStream outErro = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nomeArquivoErros)));
 
 
         Transacao itemTransacao;
@@ -42,8 +43,10 @@ public class BalanceLine {
             } else if (itemMestre.codCliente == itemTransacao.chave) {
 
                 switch (itemTransacao.tipoTransacao) {
-//                    case Transacao.INSERCAO:
-//                        break;
+                    case Transacao.INSERCAO:
+                        itemMestre.salva(outSaida);
+                        itemTransacao.salva(outErro);
+                        break;
                     case Transacao.EXCLUSAO:
                         break;
                     case Transacao.MODIFICACAO:
@@ -68,10 +71,12 @@ public class BalanceLine {
                         Cliente novoCliente = new Cliente(ins.chave, ins.nomeCliente, ins.dataNascimento);
                         novoCliente.salva(outSaida);
                         break;
-//                    case Transacao.EXCLUSAO:
-//                        break;
-//                    case Transacao.MODIFICACAO:
-//                        break;
+                    case Transacao.EXCLUSAO:
+                        itemTransacao.salva(outErro);
+                        break;
+                    case Transacao.MODIFICACAO:
+                        itemTransacao.salva(outErro);
+                        break;
                 }
                 itemTransacao = Transacao.le(inTransacao);
             }
@@ -86,9 +91,19 @@ public class BalanceLine {
             }
         } else {
             while (itemTransacao.chave != Integer.MAX_VALUE) {
-                TransacaoInsercao ins = (TransacaoInsercao) itemTransacao;
-                Cliente novoCliente = new Cliente(ins.chave, ins.nomeCliente, ins.dataNascimento);
-                novoCliente.salva(outSaida);
+                switch (itemTransacao.tipoTransacao) {
+                    case Transacao.INSERCAO:
+                        TransacaoInsercao ins = (TransacaoInsercao) itemTransacao;
+                        Cliente novoCliente = new Cliente(ins.chave, ins.nomeCliente, ins.dataNascimento);
+                        novoCliente.salva(outSaida);
+                        break;
+                    case Transacao.EXCLUSAO:
+                        itemTransacao.salva(outErro);
+                        break;
+                    case Transacao.MODIFICACAO:
+                        itemTransacao.salva(outErro);
+                        break;
+                }
                 
                 itemTransacao = Transacao.le(inTransacao);
             }
