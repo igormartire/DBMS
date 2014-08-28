@@ -17,10 +17,12 @@ public class NoConteudo {
     DataInputStream in;
     
 
+    //Escreve o registro da entidade no arquivo passado
     public void salva(DataOutputStream out) throws IOException {
         info.salva(out);
     }
 
+    //Atualiza seu atributo info com o próximo registro do arquivo
     void atualizar() throws IOException{
         info = Cliente.le(in);
     }

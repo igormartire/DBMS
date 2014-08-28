@@ -27,17 +27,21 @@ public class Main {
         No arvore = new No();
 
         try {
+            //Le todos os arquivos de entrada de registros e cria um no que aponta pra cada um deles
             for (int i = 0; i < nos.length; i++) {
                 nos[i] = new No();
                 nos[i].info.in = new DataInputStream(new BufferedInputStream(new FileInputStream(args[i])));
                 nos[i].info.atualizar();
             }
+            //Esses nos criados então serviram como base para a arvore
             arvore = arvore.criaArvore(nos);
             
+            //Lemos então o nome do arquivo de saida e instaciamos seu OutputStream
             DataOutputStream saida = new DataOutputStream(new BufferedOutputStream(
                     new FileOutputStream(args[args.length-1])));
             arvore.salvaArvore(saida);
             
+            //Agora fechamos todos os arquivos abertos
             saida.close();
             
             for (int i = 0; i < nos.length; i++) {
