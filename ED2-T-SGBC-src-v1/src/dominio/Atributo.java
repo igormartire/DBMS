@@ -46,7 +46,7 @@ public class Atributo {
                     + this.getClass().toString() + ".tipo nao pode receber um valor nulo"
                     + " ou vazio (\"\").");
         }
-        if(!tipo.equals(Atributo.TIPO_INTEIRO) || !tipo.equals(Atributo.TIPO_TEXTO)){
+        if(!tipo.equals(Atributo.TIPO_INTEIRO) && !tipo.equals(Atributo.TIPO_TEXTO)){
             throw new IllegalArgumentException("[ERRO] Valor de atributo:\n"
                     + this.getClass().toString() + ".tipo deve ser um "
                     + Atributo.TIPO_INTEIRO + " ou " + Atributo.TIPO_TEXTO);
