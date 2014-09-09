@@ -63,7 +63,6 @@ public class SGBD {
         }
     }
 
-    //TODO: Não pode deixar criar tabela que tenha o mesmo nome de alguma tabela já existente
     //TODO: Não pode deixar criar atributo com mesmo nome da chave 
     //TODO: Não pode deixar criar dois atributos com o mesmo nome na mesma tabela
     private static void opCriarTabela() {
@@ -75,23 +74,23 @@ public class SGBD {
             System.out.print("Entre com o nome da tabela: ");
             String nomeTabela = scan.next();
             
-            // Verifica se ja existe tabela com mesmo nome no catalogo
-            if(existeTabela(nomeTabela)) throw new Exception("Tabela com esse nome ja existe!");
+            //Se já existe tabela no banco de dados com o nome desejado, cancela a criação da nova tabela
+            if(getTabelaByName(nomeTabela) != null) 
+                throw new IllegalArgumentException("Tabela com esse nome ja existe!");
                 
             System.out.print("Entre com o nome do atributo chave (o tipo eh inteiro): ");
             String nomeChave = scan.next();
+            
             tabela = new Tabela(nomeTabela,nomeChave);
         }
         catch (IllegalArgumentException ex){
             System.out.println(ex.getMessage());
-            System.out.println("Criacao da tabela cancelada.");
-            return;
-        }
-        catch (Exception ex) {
-            System.out.println(ex.getMessage());
         }
         
-        if(tabela == null) return;        
+        if(tabela == null) {
+            System.out.println("Criacao da tabela cancelada.");
+            return;        
+        }
         
         //Adição de atributos
         boolean fim;
@@ -193,8 +192,8 @@ public class SGBD {
         }
     }
     
-    // Encontra uma tabela pelo nome dela
-    private static boolean existeTabela(String nomeTabela) {
+    // Retorna uma tabela pelo nome dela
+    private static Tabela getTabelaByName(String nomeTabela) {
         boolean found = false;
         Tabela tabela;
         DataInputStream in = null;
@@ -218,6 +217,9 @@ public class SGBD {
                 }
             }
         }
-        return found;
+        if(found)
+            return tabela;
+        else
+            return null;
     }
 }
