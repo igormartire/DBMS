@@ -6,6 +6,9 @@
 
 package dominio;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,14 +22,19 @@ public class Tabela {
     private String chave;
     private List<Atributo> atributos;
 
-    public Tabela(String nome, String chave) {
+    public Tabela(String nome, String chave) throws IllegalArgumentException{
         this(nome, chave, new ArrayList<Atributo>());
     }
 
-    public Tabela(String nome, String chave, List<Atributo> atributos) {
+    public Tabela(String nome, String chave, List<Atributo> atributos) throws IllegalArgumentException{
         this.setNome(nome);
         this.setChave(chave);
         this.setAtributos(atributos);
+    }
+    
+    public void addAtributo(Atributo a) {
+        if(a != null)
+            atributos.add(a);
     }
 
     public String getNome() {
@@ -67,5 +75,42 @@ public class Tabela {
         }
         this.atributos = atributos;
     }
+
+    public void salva(DataOutputStream out) throws IOException {
+        out.writeUTF(nome);
+        out.writeUTF(chave);
+        for (Atributo a : atributos) {
+            a.salva(out);
+        }
+        //Salva marcador de fim da tabela
+        Atributo marcadorFim = new Atributo("x",Atributo.TIPO_MARCADOR);
+        marcadorFim.salva(out);
+    }
     
+    public static Tabela le(DataInputStream in) throws IOException {
+        String nomeTabela = in.readUTF();        
+        String nomeAtributoChave = in.readUTF();
+        Tabela t = new Tabela(nomeTabela,nomeAtributoChave);        
+        boolean fim = false;
+        do{
+            Atributo a = Atributo.le(in);
+            if(a.getTipo() == Atributo.TIPO_MARCADOR){
+                fim = true;
+            }
+            else{
+                t.addAtributo(a);
+            }            
+        }while(!fim);
+        return t;
+    }
+    
+    @Override
+    public String toString(){
+        String str = "Nome da tabela: "+this.nome;
+        str+="\nAtributo chave: "+this.chave;
+        for(Atributo a : this.atributos) {
+            str+="\nAtributo (nome : tipo): "+a;
+        }        
+        return str;
+    }
 }

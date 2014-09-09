@@ -6,19 +6,24 @@
 
 package dominio;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 /**
  *
  * @author Daniel, Gabriel, Igor, Lucas
  */
 public class Atributo {
     
-    public static final String TIPO_INTEIRO = "inteiro";
-    public static final String TIPO_TEXTO = "texto";
+    public static final int TIPO_INTEIRO = 1;
+    public static final int TIPO_TEXTO = 2;
+    public static final int TIPO_MARCADOR = 3;
     
     private String nome;
-    private String tipo;
+    private int tipo;
 
-    public Atributo(String nome, String tipo) throws IllegalArgumentException{
+    public Atributo(String nome, int tipo) throws IllegalArgumentException{
         this.setNome(nome);
         this.setTipo(tipo);
     }
@@ -27,7 +32,7 @@ public class Atributo {
         return nome;
     }
 
-    public String getTipo() {
+    public int getTipo() {
         return tipo;
     }
 
@@ -40,18 +45,35 @@ public class Atributo {
         this.nome = nome;
     }
     
-    private void setTipo(String tipo) throws IllegalArgumentException{
-        if(tipo == null || tipo.equals("")){
-            throw new IllegalArgumentException("[ERRO] Valor de atributo:\n"
-                    + this.getClass().toString() + ".tipo nao pode receber um valor nulo"
-                    + " ou vazio (\"\").");
-        }
-        if(!tipo.equals(Atributo.TIPO_INTEIRO) && !tipo.equals(Atributo.TIPO_TEXTO)){
+    private void setTipo(int tipo) throws IllegalArgumentException{
+        if(tipo!=TIPO_INTEIRO && tipo!=TIPO_TEXTO && tipo!=TIPO_MARCADOR){
             throw new IllegalArgumentException("[ERRO] Valor de atributo:\n"
                     + this.getClass().toString() + ".tipo deve ser um "
                     + Atributo.TIPO_INTEIRO + " ou " + Atributo.TIPO_TEXTO);
         }
         this.tipo = tipo;
     }
+
+    void salva(DataOutputStream out) throws IOException {
+        out.writeUTF(nome);
+        out.writeInt(tipo);
+    }
     
+    public static Atributo le(DataInputStream in) throws IOException {
+        String nome = in.readUTF();
+        int tipo = in.readInt();
+        return new Atributo(nome,tipo);
+    }
+    
+    @Override
+    public String toString(){
+        String str = this.nome + " : ";
+        if(this.tipo == TIPO_INTEIRO){
+            str+="Inteiro";
+        }
+        else {
+            str+="Texto";
+        }
+        return str;
+    }
 }
