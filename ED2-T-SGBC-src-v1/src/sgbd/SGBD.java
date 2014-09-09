@@ -63,8 +63,6 @@ public class SGBD {
         }
     }
 
-    //TODO: Não pode deixar criar atributo com mesmo nome da chave 
-    //TODO: Não pode deixar criar dois atributos com o mesmo nome na mesma tabela
     private static void opCriarTabela() {
         System.out.println("\n----------------------------\n");        
         
@@ -103,11 +101,17 @@ public class SGBD {
             fim = true;
         }
         while(!fim) {            
-            Atributo a = null;
             System.out.print("Entre com o nome do atributo: ");
             String nomeAtributo = scan.next();   
             
+            //Se já foi adicionado um atributo com o mesmo nome, pede outro nome para o atributo.
+            if((nomeAtributo.equalsIgnoreCase(tabela.getChave())) || (tabela.getAtributoByName(nomeAtributo) != null)) {
+                System.out.println("Já há um atributo com esse nome. Escolha outro nome.");
+                continue;
+            }
+            
             try {
+                Atributo a = null;
                 boolean repete;
                 do {
                     repete = false;
