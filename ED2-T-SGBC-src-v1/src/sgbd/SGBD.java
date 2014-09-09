@@ -74,6 +74,10 @@ public class SGBD {
         try {
             System.out.print("Entre com o nome da tabela: ");
             String nomeTabela = scan.next();
+            
+            // Verifica se ja existe tabela com mesmo nome no catalogo
+            if(existeTabela(nomeTabela)) throw new Exception("Tabela com esse nome ja existe!");
+                
             System.out.print("Entre com o nome do atributo chave (o tipo eh inteiro): ");
             String nomeChave = scan.next();
             tabela = new Tabela(nomeTabela,nomeChave);
@@ -83,6 +87,10 @@ public class SGBD {
             System.out.println("Criacao da tabela cancelada.");
             return;
         }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        
         if(tabela == null) return;        
         
         //Adição de atributos
@@ -183,5 +191,33 @@ public class SGBD {
                 }
             }
         }
+    }
+    
+    // Encontra uma tabela pelo nome dela
+    private static boolean existeTabela(String nomeTabela) {
+        boolean found = false;
+        Tabela tabela;
+        DataInputStream in = null;
+        try {
+            in = new DataInputStream(new BufferedInputStream(new FileInputStream(arquivoCatalogo)));
+            while(!found) {
+                tabela = Tabela.le(in);
+                if(tabela.getNome().equalsIgnoreCase(nomeTabela))
+                    found = true;
+            }
+        } catch (EOFException ex) {
+        } catch(FileNotFoundException ex) {
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            if(in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            }
+        }
+        return found;
     }
 }
