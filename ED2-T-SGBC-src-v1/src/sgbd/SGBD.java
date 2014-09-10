@@ -199,7 +199,7 @@ public class SGBD {
     // Retorna uma tabela pelo nome dela
     private static Tabela getTabelaByName(String nomeTabela) {
         boolean found = false;
-        Tabela tabela;
+        Tabela tabela = null;
         DataInputStream in = null;
         try {
             in = new DataInputStream(new BufferedInputStream(new FileInputStream(arquivoCatalogo)));

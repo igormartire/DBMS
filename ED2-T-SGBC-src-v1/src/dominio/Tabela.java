@@ -115,7 +115,7 @@ public class Tabela {
     }
     
     // Retorna um atributo (que não a chave) pelo nome dele
-    private Atributo getAtributoByName(String nomeAtributo) {
+    public Atributo getAtributoByName(String nomeAtributo) {
         for(Atributo a : atributos) {
             if(a.getNome().equalsIgnoreCase(nomeAtributo)) {
                 return a;
