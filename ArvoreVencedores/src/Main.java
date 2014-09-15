@@ -28,7 +28,7 @@ public class Main {
 
         try {
             //Le todos os arquivos de entrada de registros e cria um no que aponta pra cada um deles
-            for (int i = 0; i < nos.length; i++) {
+            for (int i = 0; i < nos.length - 1; i++) {
                 nos[i] = new No();
                 nos[i].info.in = new DataInputStream(new BufferedInputStream(new FileInputStream(args[i])));
                 nos[i].info.atualizar();
