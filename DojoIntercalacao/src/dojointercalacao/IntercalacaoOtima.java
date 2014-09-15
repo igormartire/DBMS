@@ -42,12 +42,14 @@ public class IntercalacaoOtima {
                 args.add(nomeArquivoSaida);
                 String[] param = toArray(args);
                 
+                
                 arvoreDeVencedores(param);
                 return;
             }else{
                 String nomeSaida = "particao" + (nomeParticoes.size() + 1) + ".dat";
                 args.add(nomeSaida);
-                arvoreDeVencedores((String[]) args.toArray());
+                String[] param = toArray(args);
+                arvoreDeVencedores(param);
                 nomeParticoes.add(nomeSaida);
             }
 //            manipulaArvore(nomeParticoes.subList(i, i));
@@ -92,10 +94,11 @@ public class IntercalacaoOtima {
                 nos[i] = new No();
                 nos[i].info.in = new DataInputStream(new BufferedInputStream(new FileInputStream(args[i])));
                 nos[i].info.atualizar();
+                System.out.println(nos[i].info.info);
             }
             //Esses nos criados então serviram como base para a arvore
             arvore = arvore.criaArvore(nos);
-            
+            System.out.println(arvore.toString());
             //Lemos então o nome do arquivo de saida e instaciamos seu OutputStream
             DataOutputStream saida = new DataOutputStream(new BufferedOutputStream(
                     new FileOutputStream(args[args.length-1])));

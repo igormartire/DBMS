@@ -1,8 +1,8 @@
 package arvore;
 
-
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 /*
  * To change this template, choose Tools | Templates
@@ -34,6 +34,17 @@ public class No {
         if (nos.length == 1) {
             return nos[0];
         }
+
+        if (nos.length == 3) {
+            nosTemp = new No[nos.length - 1];
+            for (int i = 0; i < nosTemp.length; i++) {
+                nosTemp[i] = nos[i];
+                
+            }
+            pai.esq = criaArvore(nosTemp);
+            pai.dir = nos[nos.length - 1];
+            
+        }else
         /* caso onde a arvore passada tem base n par, criamos então uma 
          * arvore n/2 para cada filho
          */
@@ -45,11 +56,10 @@ public class No {
             pai.esq = criaArvore(nosTemp);
 
             for (int i = nosTemp.length; i < nos.length; i++) {
-                nosTemp[i] = nos[i];
+                nosTemp[i/2] = nos[i];
             }
             pai.dir = criaArvore(nosTemp);
-        } 
-        //caso onde a arvore passada tem base n impar, criamos então uma
+        } //caso onde a arvore passada tem base n impar, criamos então uma
         //arvore n-1 no filho da esquerda e criamos uma folha no da direita
         else {
             nosTemp = new No[nos.length - 1];
@@ -89,8 +99,7 @@ public class No {
         //Se for folha, atualizamos o conteudo dela
         if (this.esq == null && this.dir == null) {
             this.info.atualizar();
-        } 
-        //Se não for fazemos uma nova chamada para o filho de conteudo igual ao pai
+        } //Se não for fazemos uma nova chamada para o filho de conteudo igual ao pai
         else {
             if (this.info.info.codCliente == this.esq.info.info.codCliente) {
                 this.esq.itera();
@@ -106,5 +115,26 @@ public class No {
             }
         }
 
+    }
+    
+    public String toString(){
+        String esq, dir, info;
+        if(this.esq == null){
+            esq = "NULL";
+        }else{
+            esq = this.esq.toString();
+        }
+        if(this.dir == null){
+            dir = "NULL";
+        }else{
+            dir = this.dir.toString();
+        }
+        if(this.info.info == null
+                || this.info.info.codCliente == Integer.MAX_VALUE){
+            return "NULL";
+        }else{
+            info = this.info.info.toString();
+        }
+        return "<" + info + "|" + esq + "|" + dir + ">";
     }
 }
