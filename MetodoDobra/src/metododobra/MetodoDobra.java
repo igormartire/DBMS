@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author igormartire
+ * @author G7 - Daniel Prett, Gabriel Saldanha, Igor Martire, Lucas Barros
  */
 public class MetodoDobra {
 
@@ -68,7 +68,7 @@ public class MetodoDobra {
         
         //Soma a parte eliminada com a parte restante, de acordo com o método da dobra
         for(int i = 0; i < D; i++){
-            novo[D-1-i] = (novo[D-1-i] + vet[i])%10;
+            novo[D-1-i] = (novo[D-1-i] + vet[i]) % 10;
         }
         
         return novo;
