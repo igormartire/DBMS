@@ -64,7 +64,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa busca de chave que é encontrada na primeira tentativa
      */
-    //@Test
+    @Test
     public void testaBuscaChave1Tentativa() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(-1));
         tabHash.add(new CompartimentoHash(0));
@@ -85,7 +85,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa busca de chave que existia mas foi removida
      */
-    //@Test
+    @Test
     public void testaBuscaChaveRemovida() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(-1));
         tabHash.add(new CompartimentoHash(0));
@@ -105,7 +105,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa busca de chave que é encontrada na segunda tentativa
      */
-    //@Test
+    @Test
     public void testaBuscaChave2Tentativa() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
@@ -131,7 +131,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa busca de chave inexistente
      */
-    //@Test
+    @Test
     public void testaBuscaChaveInexistente() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
@@ -157,7 +157,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa busca de chave que havia sido removida, mas foi reinserida mais adiante no arquivo
      */
-    //@Test
+    @Test
     public void testaBuscaChaveReinserida() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
@@ -184,7 +184,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa inserção de cliente - existe compartimento vazio na tabela hash para receber o registro
      */
-    //@Test
+    @Test
     public void testaInsere1Tentativa() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
@@ -214,7 +214,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa inserção de registro com chave que já existe
      */
-    //@Test
+    @Test
     public void testaInsereChaveExistente() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
@@ -238,7 +238,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa inserção no final da lista encadeada
      */
-    //@Test
+    @Test
     public void testaInsereFinalLista() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
@@ -272,7 +272,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa inserção no de registro em espaco vazio deixado por registro excluído
      */
-    //@Test
+    @Test
     public void testaInsereEspacoVazio() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
@@ -305,7 +305,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa exclusão de chave não existente
      */
-    //@Test
+    @Test
     public void testaExclusaoChaveInexistente() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
@@ -336,7 +336,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa exclusão do primeiro no da lista encadeada de um determinado compartimento
      */
-    //@Test
+    @Test
     public void testaExclusaoPrimeiroNo() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
@@ -369,7 +369,7 @@ public class EncadeamentoExteriorTest {
     /**
      * Testa exclusão do ultimo no da lista encadeada de um determinado compartimento
      */
-    //@Test
+    @Test
     public void testaExclusaoUltimoNo() throws FileNotFoundException, Exception {
         tabHash.add(new CompartimentoHash(0));
         tabHash.add(new CompartimentoHash(-1));
