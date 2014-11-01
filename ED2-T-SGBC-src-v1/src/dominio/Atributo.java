@@ -38,7 +38,7 @@ public class Atributo {
 
     private void setNome(String nome) throws IllegalArgumentException{
         if(nome == null || nome.trim().equals("")){
-            throw new IllegalArgumentException("[ERRO] valor de atributo\n"
+            throw new IllegalArgumentException("[ERRO] Valor de atributo\n"
                     + this.getClass().toString() + ".nome nao pode receber um valor nulo"
                     + " ou vazio (\"\").");
         }
