@@ -65,8 +65,16 @@ public class Valor {
         return valor;
     }
     
-    public static Valor leValorTexto(RandomAccessFile in) throws IOException {                   
-        return new Valor(in.readUTF());
+    /**
+     * Gera uma String com uma representação de um Valor
+     */
+    @Override
+    public String toString() {
+        String text = this.valorTexto;
+        if (this.tipo == Atributo.TIPO_INTEIRO) {
+            text = String.valueOf(this.valorInteiro);
+        }
+        return text;
     }
    
     public int getTipo() {

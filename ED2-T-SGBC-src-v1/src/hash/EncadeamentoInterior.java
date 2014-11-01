@@ -28,6 +28,10 @@ public class EncadeamentoInterior {
         return cod % HASH_FILE_SIZE;
     }
     
+    private String getNomeArquivoHash(Tabela tabela) {
+        return tabela.getNome()+".dat";
+    }
+    
     /**
      * Cria uma tabela hash vazia de tamanho HASH_FILE_SIZE, e salva no arquivo de mesmo nome da tabela
      * Compartimento que não tem lista encadeada associada deve ter registro com chave de Registro igual a -1
@@ -37,7 +41,7 @@ public class EncadeamentoInterior {
      * @throws java.io.IOException
      */
     public void criaHash(Tabela tabela) throws FileNotFoundException, IOException {
-        String nomeArquivoHash = tabela.getNome()+".dat";
+        String nomeArquivoHash = getNomeArquivoHash(tabela);
         
         String textoVazio = "";
         for (int i = 0; i < Valor.TAMANHO_LIMITE_TEXTO; i++) {
@@ -67,33 +71,35 @@ public class EncadeamentoInterior {
     /**
     * Executa busca em Arquivos por Encadeamento Interior (Hash)
     * Assumir que ponteiro para próximo nó é igual ao endereço do compartimento quando não houver próximo nó
-    * @param codCli: chave do cliente que está sendo buscado
-    * @param nomeArquivoHash nome do arquivo que contém a tabela Hash
-    * @return Result contendo a = 1 se registro foi encontrado, e end igual ao endereco onde o cliente foi encontrado
+    * @param codReg: chave do registro que está sendo buscado
+    * @param tabela tabela na qual o registro está sendo buscado
+    * @return Result contendo a = 1 se registro foi encontrado, e end igual ao endereco onde o registro foi encontrado
     *                ou a = 2 se o registro não foi encontrado, e end igual ao primeiro endereço livre encontrado na lista encadeada, ou -1 se não encontrou endereço livre
     * @throws java.io.FileNotFoundException
     * @throws java.io.IOException
     */
-    public Result busca(int codCli, String nomeArquivoHash) throws FileNotFoundException, IOException {
+    public Result busca(int codReg, Tabela tabela) throws FileNotFoundException, IOException {
+        String nomeArquivoHash = getNomeArquivoHash(tabela);
         RandomAccessFile tabelaHash = new RandomAccessFile(nomeArquivoHash,"r");
         int encontrou = 0;
-        int endAtual = calcHash(codCli);
+        int endAtual = calcHash(codReg);
         int endResposta = -1;
+        int tamanhoRegistro = tabela.getTamanhoRegistro();
         while (encontrou == 0) {
-            tabelaHash.seek(endAtual*Cliente.tamanhoRegistro);
-            Cliente clienteAtual = Cliente.le(tabelaHash);
-            if ((clienteAtual.flag == Cliente.LIBERADO) && (endResposta == -1)){
+            tabelaHash.seek(endAtual*tamanhoRegistro);
+            Registro registroAtual = Registro.le(tabelaHash, tabela);
+            if ((registroAtual.getFlag() == Registro.LIBERADO) && (endResposta == -1)){
                 endResposta = endAtual; // primeiro endereço livre
             }
-            if ((clienteAtual.codCliente == codCli) && (clienteAtual.flag == Cliente.OCUPADO)){
-                endResposta = endAtual; // endereço do cliente achado
-                encontrou = 1; // sai do loop; cliente encontrado
+            if ((registroAtual.getValorChave() == codReg) && (registroAtual.getFlag() == Registro.OCUPADO)){
+                endResposta = endAtual; // endereço do registro achado
+                encontrou = 1; // sai do loop; registro encontrado
             }
-            else if (clienteAtual.prox == endAtual) {
-                encontrou = 2; // sai do loop; cliente não encontrado
+            else if (registroAtual.getProx() == endAtual) {
+                encontrou = 2; // sai do loop; registro não encontrado
             }
             else {
-                endAtual = clienteAtual.prox; // vai para próximo cliente da lista
+                endAtual = registroAtual.getProx(); // vai para próximo registro da lista
             }
         }        
         tabelaHash.close();
@@ -102,30 +108,32 @@ public class EncadeamentoInterior {
 
     /**
     * Executa inserção em Arquivos por Encadeamento Exterior (Hash)
-    * @param codCli: código do cliente a ser inserido
-    * @param nomeCli: nome do Cliente a ser inserido
-    * @param nomeArquivoHash nome do arquivo que contém a tabela Hash
-    * @return endereço onde o cliente foi inserido, -1 se não conseguiu inserir 
+    * @param codReg: código do registro a ser inserido
+    * @param valoresAtributos: lista com os valores dos atributos armazenados no registro
+    * @param tabela tabela na qual o registro está sendo inserido
+    * @return endereço onde o registro foi inserido, -1 se não conseguiu inserir 
     * pois já existia um registro com a mesma chave e -2 se não conseguir 
     * inserir porque não havia mais espaço para inserir registros (overflow)
     * @throws java.io.FileNotFoundException
     * @throws java.io.IOException
     */
-    public int insere(int codCli, String nomeCli, String nomeArquivoHash) throws FileNotFoundException, IOException {
-        Result resultBusca = busca(codCli,nomeArquivoHash);
+    public int insere(int codReg, List<Valor> valoresAtributos, Tabela tabela) throws FileNotFoundException, IOException {        
+        Result resultBusca = busca(codReg,tabela);
         if (resultBusca.a != 1) {            
+            String nomeArquivoHash = getNomeArquivoHash(tabela);
             RandomAccessFile tabelaHash = new RandomAccessFile(nomeArquivoHash,"rw");
+            int tamanhoRegistro = tabela.getTamanhoRegistro();
             int endInserir;
             if (resultBusca.end != -1) {
                 endInserir = resultBusca.end; // endereço livre onde devemos inserir                
             }
-            else { // nao ha espaço livre na lista encadeada; vamos buscar um espaço livre a partir do hash da chave que queremos inserir                
-                endInserir = calcHash(codCli);
-                boolean overflow = true;
+            else { // nao há espaço livre na lista encadeada; vamos buscar um espaço livre a partir do hash da chave que queremos inserir                
+                endInserir = calcHash(codReg);
+                boolean overflow = true; //valor inicial de overflow. Se não acontecer overflow o valor será trocado para false.
                 for (int i = 0 ; i < HASH_FILE_SIZE; i++) {
-                    tabelaHash.seek(endInserir*Cliente.tamanhoRegistro);
-                    Cliente clienteAtual = Cliente.le(tabelaHash);
-                    if (clienteAtual.flag == Cliente.OCUPADO) {
+                    tabelaHash.seek(endInserir*tamanhoRegistro);
+                    Registro registroAtual = Registro.le(tabelaHash,tabela);
+                    if (registroAtual.getFlag() == Registro.OCUPADO) {
                         endInserir = calcHash(endInserir + 1); // aponta para proximo espaço
                     }
                     else {
@@ -139,22 +147,24 @@ public class EncadeamentoInterior {
                 }
                 else { // endInserir esta apontando para o espaço livre onde devemos inserir
                     // devemos adicionar este novo espaco no final da lista encadeada que começa no endereço calcHash(codCli)
-                    int endAtual = calcHash(codCli);
-                    tabelaHash.seek(endAtual*Cliente.tamanhoRegistro);
-                    Cliente clienteAtual = Cliente.le(tabelaHash);
-                    while (clienteAtual.prox != endAtual) {
-                        endAtual = clienteAtual.prox;
-                        tabelaHash.seek(endAtual*Cliente.tamanhoRegistro);
-                        clienteAtual = Cliente.le(tabelaHash);
+                    int endAtual = calcHash(codReg);
+                    tabelaHash.seek(endAtual*tamanhoRegistro);
+                    Registro registroAtual = Registro.le(tabelaHash,tabela);
+                    while (registroAtual.getProx() != endAtual) {
+                        endAtual = registroAtual.getProx();
+                        tabelaHash.seek(endAtual*tamanhoRegistro);
+                        registroAtual = Registro.le(tabelaHash,tabela);
                     }
-                    clienteAtual.prox = endInserir; // último cliente da lista encadeada passa a apontar para endInserir
+                    registroAtual.setProx(endInserir); // último registro da lista encadeada passa a apontar para endInserir
+                    tabelaHash.seek(endAtual*tamanhoRegistro);
+                    registroAtual.salva(tabelaHash);
                 }
             }
-            tabelaHash.seek(endInserir*Cliente.tamanhoRegistro);
-            Cliente antigoCliente = Cliente.le(tabelaHash);            
-            Cliente novoCliente = new Cliente(codCli, nomeCli, antigoCliente.prox, Cliente.OCUPADO);
-            tabelaHash.seek(endInserir*Cliente.tamanhoRegistro);
-            novoCliente.salva(tabelaHash);
+            tabelaHash.seek(endInserir*tamanhoRegistro);
+            Registro antigoRegistro = Registro.le(tabelaHash,tabela);            
+            Registro novoRegistro = new Registro(codReg, valoresAtributos, antigoRegistro.getProx(), Registro.OCUPADO);
+            tabelaHash.seek(endInserir*tamanhoRegistro);
+            novoRegistro.salva(tabelaHash);
             tabelaHash.close();
             return endInserir;
         }
@@ -165,25 +175,27 @@ public class EncadeamentoInterior {
 
     /**
     * Executa exclusão em Arquivos por Encadeamento Exterior (Hash)
-    * @param codCli: chave do cliente a ser excluído
-    * @param nomeArquivoHash nome do arquivo que contém a tabela Hash
-    * @return endereço do cliente que foi excluído, -1 se cliente não existe
+    * @param codReg: código do registro a ser excluído
+    * @param tabela tabela da qual o registro está sendo excluído
+    * @return endereço do registro que foi excluído, -1 se registro não existe
     * @throws java.io.FileNotFoundException
     * @throws java.io.IOException
     */
-    public int exclui(int codCli, String nomeArquivoHash) throws FileNotFoundException, IOException {
-        Result resultBusca = busca(codCli,nomeArquivoHash);
+    public int exclui(int codReg, Tabela tabela) throws FileNotFoundException, IOException {
+        Result resultBusca = busca(codReg,tabela);
         if (resultBusca.a == 1) {
+            int tamanhoRegistro = tabela.getTamanhoRegistro();
+            String nomeArquivoHash = getNomeArquivoHash(tabela);
             RandomAccessFile tabelaHash = new RandomAccessFile(nomeArquivoHash,"rw");
-            tabelaHash.seek(resultBusca.end*Cliente.tamanhoRegistro);
-            Cliente cliente = Cliente.le(tabelaHash);
-            cliente.flag = Cliente.LIBERADO;
-            tabelaHash.seek(resultBusca.end*Cliente.tamanhoRegistro);
-            cliente.salva(tabelaHash);
+            tabelaHash.seek(resultBusca.end*tamanhoRegistro);
+            Registro registro = Registro.le(tabelaHash,tabela);
+            registro.setFlag(Registro.LIBERADO);
+            tabelaHash.seek(resultBusca.end*tamanhoRegistro);
+            registro.salva(tabelaHash);
             tabelaHash.close();
             return resultBusca.end;
         }
-        else { //cliente não existe
+        else { //registro não existe
             return -1;
         }
     }

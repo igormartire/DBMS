@@ -123,4 +123,19 @@ public class Tabela {
         }
         return null;
     }
+    
+    //Retorna o tamanho de um registro dessa tabela
+    public int getTamanhoRegistro() {
+        int tamanhoRegistro = 4; // 4 bytes devido à chave
+        for (Atributo a : atributos) {
+            if (a.getTipo() == Atributo.TIPO_INTEIRO) {
+                tamanhoRegistro += 4;
+            }
+            else {
+                tamanhoRegistro += Valor.TAMANHO_LIMITE_TEXTO + 2;
+            }
+        }
+        tamanhoRegistro += 4 + 1; //prox(integer) e flag(boolean)
+        return tamanhoRegistro;
+    }
 }

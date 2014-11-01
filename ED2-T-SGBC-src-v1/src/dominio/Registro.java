@@ -22,22 +22,10 @@ public class Registro {
     private List<Valor> valoresAtributos;    
     private int prox;
     private boolean flag;
-    
-    private int tamanhoRegistro;
         
     public Registro(int valorChave, List<Valor> valoresAtributos, int prox, boolean flag) {
         this.setValorChave(valorChave);
         this.setValoresAtributos(valoresAtributos);
-        int tamanhoRegistro = 4; // 4 bytes devido à chave
-        for (Valor v : valoresAtributos) {
-            if (v.getTipo() == Atributo.TIPO_INTEIRO) {
-                tamanhoRegistro += 4;
-            }
-            else {
-                tamanhoRegistro += Valor.TAMANHO_LIMITE_TEXTO + 2;
-            }
-        }
-        this.setTamanhoRegistro(tamanhoRegistro);
         this.setProx(prox);
         this.setFlag(flag);
     }
@@ -72,6 +60,25 @@ public class Registro {
         boolean flag = in.readBoolean();
         return new Registro(valorChave, valoresAtributos, prox, flag);
     }
+    
+    /**
+     * Gera uma String com uma representação de um Registro
+     */
+    @Override
+    public String toString() {
+        String s;
+        if (this.flag == Registro.LIBERADO) {
+            s = "LIBERADO";
+        } else {
+            s = "OCUPADO";
+        }
+        String text = String.valueOf(this.valorChave);
+        for (Valor v : this.valoresAtributos) {
+            text += ", " + v;
+        }
+        text += ", " + this.prox + ", " + s;
+        return text;
+    }
 
     public int getValorChave() {
         return valorChave;
@@ -89,27 +96,19 @@ public class Registro {
         this.valoresAtributos = valoresAtributos;
     }
 
-    public int getTamanhoRegistro() {
-        return tamanhoRegistro;
-    }
-
-    private void setTamanhoRegistro(int tamanhoRegistro) {
-        this.tamanhoRegistro = tamanhoRegistro;
-    }
-
     public int getProx() {
         return prox;
     }
 
-    private void setProx(int prox) {
+    public void setProx(int prox) {
         this.prox = prox;
     }
     
-    public boolean isFlag() {
+    public boolean getFlag() {
         return flag;
     }
 
-    private void setFlag(boolean flag) {
+    public void setFlag(boolean flag) {
         this.flag = flag;
     }
 }

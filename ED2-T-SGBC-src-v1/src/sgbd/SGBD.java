@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -229,8 +230,7 @@ public class SGBD {
             //Escolha da tabela
             System.out.print("Entre com o nome da tabela na qual deseja inserir um registro: ");
             String nomeTabela = SCAN.next();
-            Tabela tabela = null;
-            tabela = getTabelaByName(nomeTabela);
+            Tabela tabela = getTabelaByName(nomeTabela);
             //Se não existe tabela no banco de dados com o nome desejado, cancela a inserção do registro
             if(tabela == null) {
                 throw new IllegalArgumentException("[Erro] Não existe tabela com esse nome.");
@@ -259,23 +259,23 @@ public class SGBD {
                         break;
                 }                            
             }
-            
-            /* TODO: Consertar método busca e insere em EncadeamentoInterior para poder descomentar isso
-            int result = HASH_MASTER.insere(tabela,valorChave,valoresAtributos);
+                        
+            int result = HASH_MASTER.insere(valorChave,valoresAtributos,tabela);
             switch (result) {
                 case -1:
-                    System.out.println("[ERRO] Nao foi possivel inserir o registro.\n"
+                    System.out.println("[ERRO] Nao foi possivel inserir o registro: "
                                      + "Ja existe um registro salvo com o mesmo valor de chave.");
+                    System.out.println("Insercao de registro cancelada.");
                     break;
                 case -2:
-                    System.out.println("[ERRO] Nao foi possivel inserir o registro.\n"
+                    System.out.println("[ERRO] Nao foi possivel inserir o registro: "
                                      + "Nao ha mais espaco livre para inserir registros nessa tabela (overflow).");
+                    System.out.println("Insercao de registro cancelada.");
                     break;
                 default:
                     System.out.println("Registro inserido com sucesso.");
                     break;
-            }
-            */
+            }            
         }
         catch (IllegalArgumentException ex){
             System.out.println(ex.getMessage());
@@ -285,10 +285,49 @@ public class SGBD {
             System.out.println("[ERRO] O valor entrado eh invalido.");
             System.out.println("Insercao de registro cancelada.");
         }
+        catch(FileNotFoundException ex) {
+            System.out.println("[ERRO] O arquivo de registros da tabela desejada nao foi encontrado.");
+            System.out.println("Insercao de registro cancelada.");
+        }
+        catch(IOException ex) {
+            ex.printStackTrace();
+            System.out.println("[ERRO] Falha na leitura do arquivo de registros da tabela desejada.");
+            System.out.println("Insercao de registro cancelada.");
+        }
     }
+    
     private static void opConsultarRegistros() {
         //TODO: Implementar função
     }
+    
+    /* Método criado só para testar rapidamente se o arquivo de registros estava sendo salvo e lido corretamente. Deletar depois de terminar o trabalho ou adicionar uma opção no menu para que isso seja mostrado.
+    private static void opConsultarRegistros() {
+        RandomAccessFile in = null;
+        try {
+            in = new RandomAccessFile("Testzim.dat", "r");
+            while(true) {
+                Registro r = Registro.le(in,getTabelaByName("Testzim"));
+                System.out.println(r);
+            }
+        }
+        catch (EOFException ex) {
+        }
+        catch(FileNotFoundException ex) {
+        }
+        catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            if(in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            }
+        }
+    }
+    */
+    
     private static void opExcluirRegistros() {
         //TODO: Implementar função
     }
