@@ -11,10 +11,18 @@ package hash;
  * @author vanessa
  */
 public class Result {
-    int a;
-    int end;
+    private int a;
+    private int end;
     Result(int a, int end){
         this.a = a;
         this.end = end;
+    }
+    
+    public int getA() {
+        return a;
+    }
+
+    public int getEnd() {
+        return end;
     }
 }

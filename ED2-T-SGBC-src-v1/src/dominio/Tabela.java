@@ -41,7 +41,7 @@ public class Tabela {
         return nome;
     }
 
-    public String getChave() {
+    public String getNomeChave() {
         return chave;
     }
 
@@ -137,5 +137,51 @@ public class Tabela {
         }
         tamanhoRegistro += 4 + 1; //prox(integer) e flag(boolean)
         return tamanhoRegistro;
+    }
+    
+    /**
+     * Retorna o nome do atributo a partir do seu índice
+     * @param index index -1 se refere ao atributo-chave; index >=0 se refere ao atributo de index correspondente na lista atributos
+     * @return Nome do atributo de index passado como parâmetro
+     */
+    public String getNomeAtributoByIndex(int index) {
+        String nomeAtr;
+        if (index == -1) {
+            nomeAtr = this.getNomeChave();
+        }
+        else {
+            nomeAtr = this.atributos.get(index).getNome();
+        }
+        return nomeAtr;
+    }
+    
+    public String toString(List<Integer> indexAtributosSelecionados) {        
+        String str = "|";
+        for (Integer index : indexAtributosSelecionados) {
+            str += " ";
+            String nomeAtr = getNomeAtributoByIndex(index);            
+            while (nomeAtr.length() < Valor.TAMANHO_LIMITE_TEXTO) {
+                nomeAtr += " ";
+            }
+            str += nomeAtr;            
+            str += " |";
+        }
+        return str;
+    }
+    
+    /**
+     * Retorna uma string para separar tuplas da tabela a partir do número de atributos que estão sendo mostrados na tabela
+     * @param n número de atributos que estão sendo mostrados na tabela
+     * @return string utilizada para separar tuplas da tabela
+     */
+    public static String getLineSeparator(int n) {        
+        String ls = "";
+        for (int i = 0; i < (13*n + 1) ; i++) {
+            if(i % 13 == 0)
+                ls += "+";
+            else
+                ls += "-";
+        }
+        return ls;
     }
 }

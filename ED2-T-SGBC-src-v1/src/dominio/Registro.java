@@ -79,6 +79,20 @@ public class Registro {
         text += ", " + this.prox + ", " + s;
         return text;
     }
+    
+    /**
+     * Retorna o valor desejado atraves do indice passado como parametro
+     * @param index index -1 se refere ao valor da chave; index >=0 se refere ao index correspondente na lista valoresAtributos
+     * @return Valor selecionado
+     */
+    public Valor getValorByIndex(int index) {
+        if (index == -1) {
+            return new Valor(this.getValorChave());
+        }
+        else {
+            return this.getValoresAtributos().get(index);
+        }
+    }
 
     public int getValorChave() {
         return valorChave;
@@ -110,5 +124,25 @@ public class Registro {
 
     public void setFlag(boolean flag) {
         this.flag = flag;
+    }
+
+    public String toString(List<Integer> indexAtributosSelecionados) {        
+        String str = "|";
+        for (Integer index : indexAtributosSelecionados) {
+            str += " ";
+            Valor v = this.getValorByIndex(index);
+            if (v.getTipo() == Atributo.TIPO_INTEIRO) {
+                String strI = String.valueOf(v.getValorInteiro());
+                while (strI.length() < Valor.TAMANHO_LIMITE_TEXTO) {
+                    strI += " ";
+                }
+                str += strI;
+            }
+            else { // TIPO_TEXTO
+                str += v.getValorTexto();
+            }
+            str += " |";
+        }
+        return str;
     }
 }

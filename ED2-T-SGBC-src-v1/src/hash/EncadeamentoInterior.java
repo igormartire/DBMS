@@ -28,7 +28,7 @@ public class EncadeamentoInterior {
         return cod % HASH_FILE_SIZE;
     }
     
-    private String getNomeArquivoHash(Tabela tabela) {
+    public String getNomeArquivoHash(Tabela tabela) {
         return tabela.getNome()+".dat";
     }
     
@@ -119,13 +119,13 @@ public class EncadeamentoInterior {
     */
     public int insere(int codReg, List<Valor> valoresAtributos, Tabela tabela) throws FileNotFoundException, IOException {        
         Result resultBusca = busca(codReg,tabela);
-        if (resultBusca.a != 1) {            
+        if (resultBusca.getA() != 1) {            
             String nomeArquivoHash = getNomeArquivoHash(tabela);
             RandomAccessFile tabelaHash = new RandomAccessFile(nomeArquivoHash,"rw");
             int tamanhoRegistro = tabela.getTamanhoRegistro();
             int endInserir;
-            if (resultBusca.end != -1) {
-                endInserir = resultBusca.end; // endereço livre onde devemos inserir                
+            if (resultBusca.getEnd() != -1) {
+                endInserir = resultBusca.getEnd(); // endereço livre onde devemos inserir                
             }
             else { // nao há espaço livre na lista encadeada; vamos buscar um espaço livre a partir do hash da chave que queremos inserir                
                 endInserir = calcHash(codReg);
@@ -183,17 +183,17 @@ public class EncadeamentoInterior {
     */
     public int exclui(int codReg, Tabela tabela) throws FileNotFoundException, IOException {
         Result resultBusca = busca(codReg,tabela);
-        if (resultBusca.a == 1) {
+        if (resultBusca.getA() == 1) {
             int tamanhoRegistro = tabela.getTamanhoRegistro();
             String nomeArquivoHash = getNomeArquivoHash(tabela);
             RandomAccessFile tabelaHash = new RandomAccessFile(nomeArquivoHash,"rw");
-            tabelaHash.seek(resultBusca.end*tamanhoRegistro);
+            tabelaHash.seek(resultBusca.getEnd()*tamanhoRegistro);
             Registro registro = Registro.le(tabelaHash,tabela);
             registro.setFlag(Registro.LIBERADO);
-            tabelaHash.seek(resultBusca.end*tamanhoRegistro);
+            tabelaHash.seek(resultBusca.getEnd()*tamanhoRegistro);
             registro.salva(tabelaHash);
             tabelaHash.close();
-            return resultBusca.end;
+            return resultBusca.getEnd();
         }
         else { //registro não existe
             return -1;
