@@ -72,30 +72,35 @@ public class Filtro {
         List<Atributo> atributos = tabela.getAtributos();
         int index = -1;
         boolean criar = false;
-        do {
-            //Se ainda não houver criado nenhum filtro para este atributo, a mensagem fica:
-            //Deseja criar um filtro...?
-            //Se já houver criado um filtro para este atributo, a mensagem fica:
-            //Deseja criar mais um filtro...?
-            System.out.print("Deseja criar "+(criar?"mais ":"")+"um filtro para o atributo-chave "+tabela.getNomeChave()+"? (s/n): ");
-            criar = SGBD.SCAN.next().startsWith("s");
-            if(criar){
-                Filtro f = menuCriacaoFiltro(index,Atributo.TIPO_INTEIRO);
-                filtros.add(f);
-                System.out.println("Filtro criado com sucesso.");
-            }
-        } while(criar); //enquanto filtros forem criados, pergunte se o usuário quer mais
-        for(Atributo atr : atributos) {
-            index++;
+        System.out.print("Deseja criar algum filtro? (s/n)");
+        criar = SGBD.SCAN.next().startsWith("s");
+        if (criar){
+            criar = false;
             do {
-            System.out.print("Deseja criar "+(criar?"mais ":"")+"um filtro para o atributo "+atr.getNome()+"? (s/n): ");
-            criar = SGBD.SCAN.next().startsWith("s");            
+                //Se ainda não houver criado nenhum filtro para este atributo, a mensagem fica:
+                //Deseja criar um filtro...?
+                //Se já houver criado um filtro para este atributo, a mensagem fica:
+                //Deseja criar mais um filtro...?
+                System.out.print("Deseja criar "+(criar?"mais ":"")+"um filtro para o atributo-chave "+tabela.getNomeChave()+"? (s/n): ");
+                criar = SGBD.SCAN.next().startsWith("s");
                 if(criar){
-                    Filtro f = menuCriacaoFiltro(index,atr.getTipo());
+                    Filtro f = menuCriacaoFiltro(index,Atributo.TIPO_INTEIRO);
                     filtros.add(f);
                     System.out.println("Filtro criado com sucesso.");
                 }
-            } while(criar);
+            } while(criar); //enquanto filtros forem criados, pergunte se o usuário quer mais
+            for(Atributo atr : atributos) {
+                index++;
+                do {
+                System.out.print("Deseja criar "+(criar?"mais ":"")+"um filtro para o atributo "+atr.getNome()+"? (s/n): ");
+                criar = SGBD.SCAN.next().startsWith("s");            
+                    if(criar){
+                        Filtro f = menuCriacaoFiltro(index,atr.getTipo());
+                        filtros.add(f);
+                        System.out.println("Filtro criado com sucesso.");
+                    }
+                } while(criar);
+            }
         }
         return filtros;
     }

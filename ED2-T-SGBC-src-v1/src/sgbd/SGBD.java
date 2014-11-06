@@ -307,21 +307,31 @@ public class SGBD {
             //Seleção dos atributos a serem consultados            
             List<Integer> indexAtributosSelecionados = new LinkedList<Integer>();
             int index = -1;
-            System.out.print("Deseja consultar o atributo-chave "+tabela.getNomeChave()+"? (s/n): ");
-            boolean consultar = SGBD.SCAN.next().startsWith("s");
-            if(consultar){
-                indexAtributosSelecionados.add(index);
+            System.out.print("Deseja consultar todos os atributos? (s/n)");
+            boolean consultarTodos = SGBD.SCAN.next().startsWith("s");
+            if (consultarTodos){
+                while (index < tabela.getAtributos().size()) {
+                    indexAtributosSelecionados.add(index);
+                    index++;
+                }
             }
-            for(Atributo atr : tabela.getAtributos()) {
-                index++;
-                System.out.print("Deseja consultar o atributo "+atr.getNome()+"? (s/n): ");
-                consultar = SGBD.SCAN.next().startsWith("s");
+            else{
+                System.out.print("Deseja consultar o atributo-chave "+tabela.getNomeChave()+"? (s/n): ");
+                boolean consultar = SGBD.SCAN.next().startsWith("s");
                 if(consultar){
                     indexAtributosSelecionados.add(index);
                 }
-            }            
-            if(indexAtributosSelecionados.isEmpty()) {
-                throw new IllegalArgumentException("[Erro] Pelo menos um atributo deve ser selecionado para consulta.");
+                for(Atributo atr : tabela.getAtributos()) {
+                    index++;
+                    System.out.print("Deseja consultar o atributo "+atr.getNome()+"? (s/n): ");
+                    consultar = SGBD.SCAN.next().startsWith("s");
+                    if(consultar){
+                        indexAtributosSelecionados.add(index);
+                    }
+                }
+                if(indexAtributosSelecionados.isEmpty()) {
+                    throw new IllegalArgumentException("[Erro] Pelo menos um atributo deve ser selecionado para consulta.");
+                }
             }
             
             //Criação dos filtros
@@ -503,7 +513,112 @@ public class SGBD {
         }
     }
     private static void opModificarRegistro() {
-        //TODO: Implementar função
+        System.out.println("\n----------------------------\n");        
+       
+        try {
+            //Escolha da tabela
+            System.out.print("Entre com o nome da tabela na qual deseja modificar um registro: ");
+            String nomeTabela = SCAN.next();
+            Tabela tabela = getTabelaByName(nomeTabela);
+            //Se não existe tabela no banco de dados com o nome desejado, cancela a inserção do registro
+            if(tabela == null) {
+                throw new IllegalArgumentException("[Erro] Não existe tabela com esse nome.");
+            }
+            
+            //Valor do atributo-chave
+            System.out.print("Entre com o valor do atributo-chave "+tabela.getNomeChave()+" do registro que deseja modificar (o tipo eh inteiro): ");
+            int valorChave = SCAN.nextInt();
+                
+            //Se valor da chave não existe na tabela, então cancela modificação
+            Result res = HASH_MASTER.busca(valorChave, tabela);
+            if (res.getA() != 1) {
+                throw new IllegalArgumentException("[Erro] Não existe registro com o valor de chave informado.");
+            }
+            
+            //Listas
+            List<Atributo> atributos = tabela.getAtributos();
+            List<Valor> valoresAtributos = null;
+            
+            RandomAccessFile arquivoRegistros = null;
+            try{
+                arquivoRegistros = new RandomAccessFile(HASH_MASTER.getNomeArquivoHash(tabela),"r");
+                Registro registro;
+                int endRegistro = res.getEnd()*tabela.getTamanhoRegistro();
+                arquivoRegistros.seek(endRegistro);
+                registro = Registro.le(arquivoRegistros, tabela);
+                List<Integer> todosAtributos = new ArrayList<>();
+                for (int i = -1; i < atributos.size(); i++){
+                    todosAtributos.add(i);
+                }
+                
+                System.out.println("O registro armazenado se encontra assim: ");
+                System.out.println(Tabela.getLineSeparator(todosAtributos.size()));
+                System.out.println(tabela.toString(todosAtributos));
+                System.out.println(Tabela.getLineSeparator(todosAtributos.size()));
+                System.out.println(registro.toString(todosAtributos));
+                System.out.println(Tabela.getLineSeparator(todosAtributos.size()));
+                
+                for(int i = 0; i < atributos.size(); i++){
+                    System.out.println(i + " - " + tabela.getNomeAtributoByIndex(i));
+                }
+                
+                System.out.print("Digite o numero referente ao atributo que deseja mudar: ");
+                int opcao = SCAN.nextInt();
+                
+                if (opcao < 0 || opcao >= atributos.size()){
+                    throw new IllegalArgumentException("[Erro] Opção de atributo inválida.");
+                }
+                else{
+                    Valor valor;
+                    Atributo atr = atributos.get(opcao);
+                    valoresAtributos = registro.getValoresAtributos();
+                    switch(atr.getTipo()) {
+                        case Atributo.TIPO_INTEIRO:
+                            System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh inteiro): ");
+                            int valorAtributoInteiro = SCAN.nextInt();
+                            valor = new Valor(valorAtributoInteiro);
+                            valoresAtributos.set(opcao, valor);
+                            break;
+                        case Atributo.TIPO_TEXTO:
+                            System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh texto): ");
+                            String valorAtributoTexto = SCAN.next();
+                            valor = new Valor(valorAtributoTexto);
+                            valoresAtributos.set(opcao, valor);
+                            break;                            
+                    }
+                }
+                
+                
+            }
+            finally {
+                if(arquivoRegistros != null){
+                    try {
+                        arquivoRegistros.close();
+                    } catch (IOException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                }
+            }
+            
+            HASH_MASTER.modifica(valorChave, valoresAtributos, tabela);
+            System.out.println("Registro modificado com sucesso.");
+        }
+        catch (IllegalArgumentException ex){
+            System.out.println(ex.getMessage());
+            System.out.println("Modificacao de registro cancelada.");
+        }
+        catch (InputMismatchException ex) {
+            System.out.println("[ERRO] O valor entrado eh invalido.");
+            System.out.println("Modificacao de registro cancelada.");
+        }
+        catch(FileNotFoundException ex) {
+            System.out.println("[ERRO] O arquivo de registros da tabela desejada nao foi encontrado.");
+            System.out.println("Modificacao de registro cancelada.");
+        }
+        catch(IOException ex) {
+            System.out.println("[ERRO] Falha na leitura do arquivo de registros da tabela desejada.");
+            System.out.println("Modificacao de registro cancelada.");
+        }
     }
     
     // Retorna uma tabela pelo nome dela

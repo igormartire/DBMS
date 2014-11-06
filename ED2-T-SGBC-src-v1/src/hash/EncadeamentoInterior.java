@@ -199,5 +199,18 @@ public class EncadeamentoInterior {
             return -1;
         }
     }
+    
+    public void modifica(int codReg, List<Valor> valoresAtributos, Tabela tabela) throws FileNotFoundException, IOException{
+        Result resultBusca = busca(codReg,tabela);
+        int tamanhoRegistro = tabela.getTamanhoRegistro();
+        String nomeArquivoHash = getNomeArquivoHash(tabela);
+        RandomAccessFile tabelaHash = new RandomAccessFile(nomeArquivoHash,"rw");
+        tabelaHash.seek(resultBusca.getEnd()*tamanhoRegistro);
+        Registro registro = Registro.le(tabelaHash, tabela);
+        Registro registroModficado = new Registro(codReg, valoresAtributos, registro.getProx(), Registro.OCUPADO);
+        tabelaHash.seek(resultBusca.getEnd()*tamanhoRegistro);
+        registroModficado.salva(tabelaHash);
+        tabelaHash.close();
+    }
 
 }
