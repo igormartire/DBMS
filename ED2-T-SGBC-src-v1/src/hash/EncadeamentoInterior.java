@@ -200,17 +200,23 @@ public class EncadeamentoInterior {
         }
     }
     
-    public void modifica(int codReg, List<Valor> valoresAtributos, Tabela tabela) throws FileNotFoundException, IOException{
+    public int modifica(int codReg, List<Valor> valoresAtributos, Tabela tabela) throws FileNotFoundException, IOException{
         Result resultBusca = busca(codReg,tabela);
-        int tamanhoRegistro = tabela.getTamanhoRegistro();
-        String nomeArquivoHash = getNomeArquivoHash(tabela);
-        RandomAccessFile tabelaHash = new RandomAccessFile(nomeArquivoHash,"rw");
-        tabelaHash.seek(resultBusca.getEnd()*tamanhoRegistro);
-        Registro registro = Registro.le(tabelaHash, tabela);
-        Registro registroModficado = new Registro(codReg, valoresAtributos, registro.getProx(), Registro.OCUPADO);
-        tabelaHash.seek(resultBusca.getEnd()*tamanhoRegistro);
-        registroModficado.salva(tabelaHash);
-        tabelaHash.close();
+        if (resultBusca.getA() == 1) {
+            int tamanhoRegistro = tabela.getTamanhoRegistro();
+            String nomeArquivoHash = getNomeArquivoHash(tabela);
+            RandomAccessFile tabelaHash = new RandomAccessFile(nomeArquivoHash,"rw");
+            tabelaHash.seek(resultBusca.getEnd()*tamanhoRegistro);
+            Registro registro = Registro.le(tabelaHash, tabela);
+            Registro registroModficado = new Registro(codReg, valoresAtributos, registro.getProx(), Registro.OCUPADO);
+            tabelaHash.seek(resultBusca.getEnd()*tamanhoRegistro);
+            registroModficado.salva(tabelaHash);
+            tabelaHash.close();
+            return resultBusca.getEnd();
+        }
+        else { //registro não existe
+            return -1;
+        }
     }
 
 }
