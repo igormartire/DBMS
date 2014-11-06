@@ -558,37 +558,40 @@ public class SGBD {
                 System.out.println(registro.toString(todosAtributos));
                 System.out.println(Tabela.getLineSeparator(todosAtributos.size()));
                 
-                for(int i = 0; i < atributos.size(); i++){
-                    System.out.println(i + " - " + tabela.getNomeAtributoByIndex(i));
-                }
-                
-                System.out.print("Digite o numero referente ao atributo que deseja mudar: ");
-                int opcao = SCAN.nextInt();
-                
-                if (opcao < 0 || opcao >= atributos.size()){
-                    throw new IllegalArgumentException("[Erro] Opção de atributo inválida.");
-                }
-                else{
-                    Valor valor;
-                    Atributo atr = atributos.get(opcao);
-                    valoresAtributos = registro.getValoresAtributos();
-                    switch(atr.getTipo()) {
-                        case Atributo.TIPO_INTEIRO:
-                            System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh inteiro): ");
-                            int valorAtributoInteiro = SCAN.nextInt();
-                            valor = new Valor(valorAtributoInteiro);
-                            valoresAtributos.set(opcao, valor);
-                            break;
-                        case Atributo.TIPO_TEXTO:
-                            System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh texto): ");
-                            String valorAtributoTexto = SCAN.next();
-                            valor = new Valor(valorAtributoTexto);
-                            valoresAtributos.set(opcao, valor);
-                            break;                            
+                boolean continuar = false;
+                do {
+                    for(int i = 0; i < atributos.size(); i++){
+                        System.out.println(i + " - " + tabela.getNomeAtributoByIndex(i));
                     }
-                }
-                
-                
+
+                    System.out.print("Digite o numero referente ao atributo que deseja mudar: ");
+                    int opcao = SCAN.nextInt();
+
+                    if (opcao < 0 || opcao >= atributos.size()){
+                        throw new IllegalArgumentException("[Erro] Opção de atributo inválida.");
+                    }
+                    else{
+                        Valor valor;
+                        Atributo atr = atributos.get(opcao);
+                        valoresAtributos = registro.getValoresAtributos();
+                        switch(atr.getTipo()) {
+                            case Atributo.TIPO_INTEIRO:
+                                System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh inteiro): ");
+                                int valorAtributoInteiro = SCAN.nextInt();
+                                valor = new Valor(valorAtributoInteiro);
+                                valoresAtributos.set(opcao, valor);
+                                break;
+                            case Atributo.TIPO_TEXTO:
+                                System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh texto): ");
+                                String valorAtributoTexto = SCAN.next();
+                                valor = new Valor(valorAtributoTexto);
+                                valoresAtributos.set(opcao, valor);
+                                break;                            
+                        }
+                    }
+                    System.out.print("Deseja fazer mais alguma modificação? (s/n)");
+                    continuar = SCAN.next().startsWith("s");
+                }while(continuar);
             }
             finally {
                 if(arquivoRegistros != null){
