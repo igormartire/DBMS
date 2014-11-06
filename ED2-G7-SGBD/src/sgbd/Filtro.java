@@ -72,7 +72,7 @@ public class Filtro {
         List<Atributo> atributos = tabela.getAtributos();
         int index = -1;
         boolean criar = false;
-        System.out.print("Deseja criar algum filtro? (s/n)");
+        System.out.print("Deseja criar algum filtro? (s/n): ");
         criar = SGBD.SCAN.next().startsWith("s");
         if (criar){
             criar = false;
@@ -119,20 +119,27 @@ public class Filtro {
                                 +OPER_MENOR_OU_IGUAL+"- Menor ou igual (<=)\n");
             System.out.print("Operador: ");
             try{
-                int op = SGBD.SCAN.nextInt();
-                switch(op){
-                    case OPER_IGUAL:
-                    case OPER_DIFERENTE:
-                    case OPER_MAIOR:
-                    case OPER_MAIOR_OU_IGUAL:
-                    case OPER_MENOR:
-                    case OPER_MENOR_OU_IGUAL:
-                        entradaValida=true;
-                        operador = op;
-                        break;
-                    default:
-                        System.out.println("Entrada invalida: codigo de operador invalido.");
-                        entradaValida = false;
+                if (!SGBD.SCAN.hasNextInt()){
+                    SGBD.SCAN.next();
+                    System.out.println("Entrada invalida: a entrada deve ser um numero inteiro.");
+                    entradaValida = false;
+                }
+                else {
+                    int op = SGBD.SCAN.nextInt();
+                    switch(op){
+                        case OPER_IGUAL:
+                        case OPER_DIFERENTE:
+                        case OPER_MAIOR:
+                        case OPER_MAIOR_OU_IGUAL:
+                        case OPER_MENOR:
+                        case OPER_MENOR_OU_IGUAL:
+                            entradaValida=true;
+                            operador = op;
+                            break;
+                        default:
+                            System.out.println("Entrada invalida: codigo de operador invalido.");
+                            entradaValida = false;
+                    }
                 }
             }
             catch(InputMismatchException ex){
@@ -147,16 +154,24 @@ public class Filtro {
                 switch(tipoAtributoFiltrado) {
                     case Atributo.TIPO_INTEIRO:
                         System.out.print("Entre com o valor do operando (o tipo eh inteiro): ");
-                        int valorOperandoInteiro = SGBD.SCAN.nextInt();
-                        operando = new Valor(valorOperandoInteiro);
+                        if (!SGBD.SCAN.hasNextInt()){
+                            SGBD.SCAN.next();
+                            System.out.println("Entrada invalida: a entrada deve ser um numero inteiro.");
+                            entradaValida = false;
+                        }
+                        else {
+                            int valorOperandoInteiro = SGBD.SCAN.nextInt();
+                            operando = new Valor(valorOperandoInteiro);                            
+                            entradaValida = true;
+                        }
                         break;
                     case Atributo.TIPO_TEXTO:
                         System.out.print("Entre com o valor do operando (o tipo eh texto): ");
                         String valorOperandoTexto = SGBD.SCAN.next();
                         operando = new Valor(valorOperandoTexto);
+                        entradaValida = true;
                         break;
-                }
-                entradaValida = true;
+                }                
             }
             catch(InputMismatchException ex){
                 System.out.println("Entrada invalida: a entrada deve ser do tipo requisitado.");

@@ -176,8 +176,9 @@ public class Tabela {
      */
     public static String getLineSeparator(int n) {        
         String ls = "";
-        for (int i = 0; i < (13*n + 1) ; i++) {
-            if(i % 13 == 0)
+        int aux = Valor.TAMANHO_LIMITE_TEXTO + 3;
+        for (int i = 0; i < (aux*n + 1) ; i++) {
+            if(i % aux == 0)
                 ls += "+";
             else
                 ls += "-";

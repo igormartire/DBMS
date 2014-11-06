@@ -14,7 +14,7 @@ import java.util.Objects;
  * @author igormartire
  */
 public class Valor implements Comparable<Valor>{    
-    public static final int TAMANHO_LIMITE_TEXTO = 10;
+    public static final int TAMANHO_LIMITE_TEXTO = 15;
     
     private int tipo;    
     private int valorInteiro;

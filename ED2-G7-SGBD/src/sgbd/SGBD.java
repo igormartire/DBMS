@@ -49,6 +49,7 @@ public class SGBD {
                             +"# *Lucas Barros     #\n"
                             +"#####################\n");        
         boolean sair = false;
+        SCAN.useDelimiter("\n");
         while (!sair) {
             System.out.println  ("Entre com o codigo da opcao desejada:\n"
                                 +OP_CRIAR_TABELA+"- Criar tabela\n"
@@ -60,34 +61,40 @@ public class SGBD {
                                 +OP_SAIR+"- Sair\n");
             
             System.out.print("Opcao: ");
-            int op = SCAN.nextInt();  
-            switch (op) {
-                case OP_CRIAR_TABELA:
-                    opCriarTabela();
-                    break;
-                case OP_MOSTRAR_TABELAS:
-                    opMostrarTabelas();
-                    break;
-                case OP_INSERIR_REGISTRO:
-                    opInserirRegistro();
-                    break;
-                case OP_CONSULTAR_REGISTROS:
-                    opConsultarRegistros();
-                    break;
-                case OP_EXCLUIR_REGISTROS:
-                    opExcluirRegistros();
-                    break;
-                case OP_MODIFICAR_REGISTRO:
-                    opModificarRegistro();
-                    break;
-                case OP_SAIR:
-                    sair = true;
-                    break;
-                default:
-                    System.out.println("\nOpcao invalida.");
-                break;
+            if (!SCAN.hasNextInt()){                        
+                SCAN.next(); //ignora entrada     
+                System.out.println("[ERRO] Entre com um valor inteiro.");
             }
-            System.out.println("\n----------------------------\n");
+            else {
+                int op = SCAN.nextInt();  
+                switch (op) {
+                    case OP_CRIAR_TABELA:
+                        opCriarTabela();
+                        break;
+                    case OP_MOSTRAR_TABELAS:
+                        opMostrarTabelas();
+                        break;
+                    case OP_INSERIR_REGISTRO:
+                        opInserirRegistro();
+                        break;
+                    case OP_CONSULTAR_REGISTROS:
+                        opConsultarRegistros();
+                        break;
+                    case OP_EXCLUIR_REGISTROS:
+                        opExcluirRegistros();
+                        break;
+                    case OP_MODIFICAR_REGISTRO:
+                        opModificarRegistro();
+                        break;
+                    case OP_SAIR:
+                        sair = true;
+                        break;
+                    default:
+                        System.out.println("\nOpcao invalida.");
+                    break;
+                }
+                System.out.println("\n----------------------------\n");
+            }            
         }
     }
 
@@ -138,7 +145,13 @@ public class SGBD {
                 do {
                     repete = false;
                     System.out.print("Entre com o tipo do atributo (1 para inteiro e 2 para texto): ");
-                    int opTipoAtributo = SCAN.nextInt();                        
+                    int opTipoAtributo = 0;
+                    if (!SCAN.hasNextInt()){   
+                        SCAN.next(); //ignora entrada                    
+                    }
+                    else {
+                        opTipoAtributo = SCAN.nextInt();
+                    }
                     switch(opTipoAtributo){
                         case 1:
                             a = new Atributo(nomeAtributo,Atributo.TIPO_INTEIRO);
@@ -227,7 +240,11 @@ public class SGBD {
             }
             
             //Valor do atributo-chave
-            System.out.print("Entre com o valor do atributo-chave "+tabela.getNomeChave()+" (o tipo eh inteiro): ");
+            System.out.print("Entre com o valor do atributo-chave "+tabela.getNomeChave()+" (o tipo eh inteiro): ");            
+            if (!SCAN.hasNextInt()){   
+                SCAN.next(); //limpa entrada
+                throw new IllegalArgumentException("[ERRO] O valor entrado eh invalido.");
+            }
             int valorChave = SCAN.nextInt();
                 
             //Se valor da chave já existe na tabela, então cancela inserção
@@ -243,6 +260,10 @@ public class SGBD {
                 switch(atr.getTipo()) {
                     case Atributo.TIPO_INTEIRO:
                         System.out.print("Entre com o valor do atributo "+atr.getNome()+" (o tipo eh inteiro): ");
+                        if (!SCAN.hasNextInt()){
+                            SCAN.next();
+                            throw new IllegalArgumentException("[ERRO] O valor entrado eh invalido.");
+                        }
                         int valorAtributoInteiro = SCAN.nextInt();
                         valor = new Valor(valorAtributoInteiro);
                         valoresAtributos.add(valor);
@@ -307,7 +328,7 @@ public class SGBD {
             //Seleção dos atributos a serem consultados            
             List<Integer> indexAtributosSelecionados = new LinkedList<Integer>();
             int index = -1;
-            System.out.print("Deseja consultar todos os atributos? (s/n)");
+            System.out.print("Deseja consultar todos os atributos? (s/n): ");
             boolean consultarTodos = SGBD.SCAN.next().startsWith("s");
             if (consultarTodos){
                 while (index < tabela.getAtributos().size()) {
@@ -369,7 +390,7 @@ public class SGBD {
             }
             catch (EOFException ex) {
                 System.out.println("Consulta realizada com sucesso.");
-                System.out.println("Foram mostrados "+contMostrados+" registros.");
+                System.out.println("Foram mostrados "+contMostrados+" registro(s).");
             }
             finally {
                 if(arquivoRegistros != null){
@@ -399,35 +420,7 @@ public class SGBD {
             System.out.println("Consulta de registros cancelada.");
         }
     }
-    
-    /* Método criado só para testar rapidamente se o arquivo de registros estava sendo salvo e lido corretamente. Deletar depois de terminar o trabalho ou adicionar uma opção no menu para que isso seja mostrado.
-    private static void opConsultarRegistros() {
-        RandomAccessFile in = null;
-        try {
-            in = new RandomAccessFile("Testzim.dat", "r");
-            while(true) {
-                Registro r = Registro.le(in,getTabelaByName("Testzim"));
-                System.out.println(r);
-            }
-        }
-        catch (EOFException ex) {
-        }
-        catch(FileNotFoundException ex) {
-        }
-        catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        } finally {
-            if(in != null) {
-                try {
-                    in.close();
-                } catch (IOException ex) {
-                    System.out.println(ex.getMessage());
-                }
-            }
-        }
-    }
-    */    
-    
+     
     private static void opExcluirRegistros() {
         System.out.println("\n----------------------------\n");        
        
@@ -482,7 +475,7 @@ public class SGBD {
             }
             catch (EOFException ex) {
                 System.out.println("Exclusão realizada com sucesso.");
-                System.out.println("Foram excluidos "+contExcluidos+" registros.");
+                System.out.println("Foram excluidos "+contExcluidos+" registro(s).");
             }
             finally {
                 if(arquivoRegistros != null){
@@ -527,6 +520,10 @@ public class SGBD {
             
             //Valor do atributo-chave
             System.out.print("Entre com o valor do atributo-chave "+tabela.getNomeChave()+" do registro que deseja modificar (o tipo eh inteiro): ");
+            if (!SCAN.hasNextInt()){   
+                SCAN.next(); //limpa entrada
+                throw new IllegalArgumentException("[ERRO] O valor entrado eh invalido.");
+            }
             int valorChave = SCAN.nextInt();
                 
             //Se valor da chave não existe na tabela, então cancela modificação
@@ -551,7 +548,7 @@ public class SGBD {
                     todosAtributos.add(i);
                 }
                 
-                System.out.println("O registro armazenado se encontra assim: ");
+                System.out.println("\nO registro armazenado se encontra assim: ");
                 System.out.println(Tabela.getLineSeparator(todosAtributos.size()));
                 System.out.println(tabela.toString(todosAtributos));
                 System.out.println(Tabela.getLineSeparator(todosAtributos.size()));
@@ -559,37 +556,50 @@ public class SGBD {
                 System.out.println(Tabela.getLineSeparator(todosAtributos.size()));
                 
                 boolean continuar = false;
-                do {
-                    for(int i = 0; i < atributos.size(); i++){
-                        System.out.println(i + " - " + tabela.getNomeAtributoByIndex(i));
+                do {                    
+                    System.out.println("\nAtributos: ");
+                    for(int i = 1; i <= atributos.size(); i++){
+                        System.out.println(i + " - " + tabela.getNomeAtributoByIndex(i-1));
                     }
 
-                    System.out.print("Digite o numero referente ao atributo que deseja mudar: ");
-                    int opcao = SCAN.nextInt();
-
-                    if (opcao < 0 || opcao >= atributos.size()){
-                        throw new IllegalArgumentException("[Erro] Opção de atributo inválida.");
-                    }
-                    else{
-                        Valor valor;
-                        Atributo atr = atributos.get(opcao);
-                        valoresAtributos = registro.getValoresAtributos();
-                        switch(atr.getTipo()) {
-                            case Atributo.TIPO_INTEIRO:
-                                System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh inteiro): ");
-                                int valorAtributoInteiro = SCAN.nextInt();
-                                valor = new Valor(valorAtributoInteiro);
-                                valoresAtributos.set(opcao, valor);
-                                break;
-                            case Atributo.TIPO_TEXTO:
-                                System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh texto): ");
-                                String valorAtributoTexto = SCAN.next();
-                                valor = new Valor(valorAtributoTexto);
-                                valoresAtributos.set(opcao, valor);
-                                break;                            
+                    boolean invalido;
+                    int opcao;
+                            
+                    do { 
+                        invalido = false;
+                        System.out.print("Digite o codigo do atributo que deseja modificar: ");
+                        if (!SCAN.hasNextInt()){   
+                            SCAN.next(); //limpa entrada
+                            throw new IllegalArgumentException("[ERRO] O valor entrado eh invalido.");
                         }
+                        opcao = SCAN.nextInt() - 1;                    
+                        if (opcao < 0 || opcao >= atributos.size()){
+                            invalido = true;
+                            System.out.println("[Erro] Codigo de atributo invalido.");
+                        }
+                    } while (invalido);
+                    Valor valor;
+                    Atributo atr = atributos.get(opcao);
+                    valoresAtributos = registro.getValoresAtributos();
+                    switch(atr.getTipo()) {
+                        case Atributo.TIPO_INTEIRO:
+                            System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh inteiro): ");
+                            if (!SCAN.hasNextInt()){   
+                                SCAN.next(); //limpa entrada
+                                throw new IllegalArgumentException("[ERRO] O valor entrado eh invalido.");
+                            }
+                            int valorAtributoInteiro = SCAN.nextInt();
+                            valor = new Valor(valorAtributoInteiro);
+                            valoresAtributos.set(opcao, valor);
+                            break;
+                        case Atributo.TIPO_TEXTO:
+                            System.out.print("Entre com o novo valor do atributo "+atr.getNome()+" (o tipo eh texto): ");
+                            String valorAtributoTexto = SCAN.next();
+                            valor = new Valor(valorAtributoTexto);
+                            valoresAtributos.set(opcao, valor);
+                            break;                            
                     }
-                    System.out.print("Deseja fazer mais alguma modificação? (s/n)");
+                    System.out.print("Deseja fazer mais alguma modificação? (s/n): ");
                     continuar = SCAN.next().startsWith("s");
                 }while(continuar);
             }
@@ -637,8 +647,7 @@ public class SGBD {
                     found = true;
             }
         } catch (EOFException ex) {
-        } catch(FileNotFoundException ex) {
-            System.out.println(ex.getMessage());
+        } catch(FileNotFoundException ex) {            
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         } finally {
