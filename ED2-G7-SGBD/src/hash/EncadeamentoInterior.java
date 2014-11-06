@@ -15,7 +15,10 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ *
+ * @author Daniel Prett, Gabriel Saldanha, Igor Martire, Lucas Barros
+ */
 public class EncadeamentoInterior {
 
     private final int HASH_FILE_SIZE;

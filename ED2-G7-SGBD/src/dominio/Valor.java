@@ -11,7 +11,7 @@ import java.util.Objects;
 
 /**
  *
- * @author igormartire
+ * @author Daniel Prett, Gabriel Saldanha, Igor Martire, Lucas Barros
  */
 public class Valor implements Comparable<Valor>{    
     public static final int TAMANHO_LIMITE_TEXTO = 15;

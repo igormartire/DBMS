@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  *
- * @author igormartire
+ * @author Daniel Prett, Gabriel Saldanha, Igor Martire, Lucas Barros
  */
 public class Filtro {
     public static final int OPER_IGUAL = 1;

@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  *
- * @author igormartire
+ * @author Daniel Prett, Gabriel Saldanha, Igor Martire, Lucas Barros
  */
 public class Registro {
     public static boolean LIBERADO = true;

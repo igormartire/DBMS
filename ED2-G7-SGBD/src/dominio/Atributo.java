@@ -12,7 +12,7 @@ import java.io.IOException;
 
 /**
  *
- * @author Daniel, Gabriel, Igor, Lucas
+ * @author Daniel Prett, Gabriel Saldanha, Igor Martire, Lucas Barros
  */
 public class Atributo {
     

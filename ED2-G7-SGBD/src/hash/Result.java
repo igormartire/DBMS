@@ -8,7 +8,7 @@ package hash;
 
 /**
  *
- * @author vanessa
+ * @author Daniel Prett, Gabriel Saldanha, Igor Martire, Lucas Barros
  */
 public class Result {
     private int a;
