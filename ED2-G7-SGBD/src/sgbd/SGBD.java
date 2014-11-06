@@ -128,7 +128,8 @@ public class SGBD {
         //Adição de atributos
         boolean fim;
         System.out.print("Deseja adicionar mais um atributo? (s/n): ");
-        fim = !SCAN.next().startsWith("s");
+        String input = SGBD.SCAN.next();
+        fim = !(input.startsWith("s") || input.startsWith("S"));
         while(!fim) {            
             System.out.print("Entre com o nome do atributo: ");
             String nomeAtributo = SCAN.next();   
@@ -172,7 +173,8 @@ public class SGBD {
             }            
                         
             System.out.print("Deseja adicionar mais um atributo? (s/n): ");
-            fim = !SCAN.next().startsWith("s");           
+            String inputA = SGBD.SCAN.next();
+            fim = !(inputA.startsWith("s") || inputA.startsWith("S"));           
         }
         
         //Gravação da tabela no arquivo de catálogo e criação do arquivo de registros
@@ -239,60 +241,69 @@ public class SGBD {
                 throw new IllegalArgumentException("[Erro] Não existe tabela com esse nome.");
             }
             
-            //Valor do atributo-chave
-            System.out.print("Entre com o valor do atributo-chave "+tabela.getNomeChave()+" (o tipo eh inteiro): ");            
-            if (!SCAN.hasNextInt()){   
-                SCAN.next(); //limpa entrada
-                throw new IllegalArgumentException("[ERRO] O valor entrado eh invalido.");
-            }
-            int valorChave = SCAN.nextInt();
-                
-            //Se valor da chave já existe na tabela, então cancela inserção
-            Result res = HASH_MASTER.busca(valorChave, tabela);
-            if (res.getA() == 1) {
-                throw new IllegalArgumentException("[Erro] Já existe um registro com a mesma chave.");
-            }
-            
-            //Valores dos demais atributos
-            List<Valor> valoresAtributos = new ArrayList<Valor>();
-            for(Atributo atr : tabela.getAtributos()) {
-                Valor valor;
-                switch(atr.getTipo()) {
-                    case Atributo.TIPO_INTEIRO:
-                        System.out.print("Entre com o valor do atributo "+atr.getNome()+" (o tipo eh inteiro): ");
-                        if (!SCAN.hasNextInt()){
-                            SCAN.next();
-                            throw new IllegalArgumentException("[ERRO] O valor entrado eh invalido.");
-                        }
-                        int valorAtributoInteiro = SCAN.nextInt();
-                        valor = new Valor(valorAtributoInteiro);
-                        valoresAtributos.add(valor);
+            boolean continua=true;
+            do {
+                //Valor do atributo-chave
+                System.out.print("Entre com o valor do atributo-chave "+tabela.getNomeChave()+" (o tipo eh inteiro): ");            
+                if (!SCAN.hasNextInt()){   
+                    SCAN.next(); //limpa entrada
+                    throw new IllegalArgumentException("[ERRO] O valor entrado eh invalido.");
+                }
+                int valorChave = SCAN.nextInt();
+
+                //Se valor da chave já existe na tabela, então cancela inserção
+                Result res = HASH_MASTER.busca(valorChave, tabela);
+                if (res.getA() == 1) {
+                    throw new IllegalArgumentException("[Erro] Já existe um registro com a mesma chave.");
+                }
+
+                //Valores dos demais atributos
+                List<Valor> valoresAtributos = new ArrayList<Valor>();
+                for(Atributo atr : tabela.getAtributos()) {
+                    Valor valor;
+                    switch(atr.getTipo()) {
+                        case Atributo.TIPO_INTEIRO:
+                            System.out.print("Entre com o valor do atributo "+atr.getNome()+" (o tipo eh inteiro): ");
+                            if (!SCAN.hasNextInt()){
+                                SCAN.next();
+                                throw new IllegalArgumentException("[ERRO] O valor entrado eh invalido.");
+                            }
+                            int valorAtributoInteiro = SCAN.nextInt();
+                            valor = new Valor(valorAtributoInteiro);
+                            valoresAtributos.add(valor);
+                            break;
+                        case Atributo.TIPO_TEXTO:
+                            System.out.print("Entre com o valor do atributo "+atr.getNome()+" (o tipo eh texto): ");
+                            String valorAtributoTexto = SCAN.next();
+                            valor = new Valor(valorAtributoTexto);
+                            valoresAtributos.add(valor);
+                            break;
+                    }                            
+                }
+
+                int result = HASH_MASTER.insere(valorChave,valoresAtributos,tabela);
+                switch (result) {
+                    case -1: //não deve aparecer porque o valor da chave já foi testado lá em cima
+                        System.out.println("[ERRO] Nao foi possivel inserir o registro: "
+                                         + "Ja existe um registro salvo com o mesmo valor de chave.");
+                        System.out.println("Insercao de registro cancelada.");
                         break;
-                    case Atributo.TIPO_TEXTO:
-                        System.out.print("Entre com o valor do atributo "+atr.getNome()+" (o tipo eh texto): ");
-                        String valorAtributoTexto = SCAN.next();
-                        valor = new Valor(valorAtributoTexto);
-                        valoresAtributos.add(valor);
+                    case -2:
+                        System.out.println("[ERRO] Nao foi possivel inserir o registro: "
+                                         + "Nao ha mais espaco livre para inserir registros nessa tabela (overflow).");
+                        System.out.println("Insercao de registro cancelada.");
+                        continua = false;
                         break;
-                }                            
-            }
-                        
-            int result = HASH_MASTER.insere(valorChave,valoresAtributos,tabela);
-            switch (result) {
-                case -1: //não deve aparecer porque o valor da chave já foi testado lá em cima
-                    System.out.println("[ERRO] Nao foi possivel inserir o registro: "
-                                     + "Ja existe um registro salvo com o mesmo valor de chave.");
-                    System.out.println("Insercao de registro cancelada.");
-                    break;
-                case -2:
-                    System.out.println("[ERRO] Nao foi possivel inserir o registro: "
-                                     + "Nao ha mais espaco livre para inserir registros nessa tabela (overflow).");
-                    System.out.println("Insercao de registro cancelada.");
-                    break;
-                default:
-                    System.out.println("Registro inserido com sucesso.");
-                    break;
-            }            
+                    default:
+                        System.out.println("Registro inserido com sucesso.");
+                        break;
+                }    
+                if(continua) {
+                    System.out.print("Deseja inserir mais um registro nessa tabela? (s/n): ");
+                    String input = SGBD.SCAN.next();
+                    continua = input.startsWith("s") || input.startsWith("S");  
+                }
+            } while(continua);
         }
         catch (IllegalArgumentException ex){
             System.out.println(ex.getMessage());
@@ -329,7 +340,8 @@ public class SGBD {
             List<Integer> indexAtributosSelecionados = new LinkedList<Integer>();
             int index = -1;
             System.out.print("Deseja consultar todos os atributos? (s/n): ");
-            boolean consultarTodos = SGBD.SCAN.next().startsWith("s");
+            String input = SGBD.SCAN.next();
+            boolean consultarTodos = input.startsWith("s") || input.startsWith("S");
             if (consultarTodos){
                 while (index < tabela.getAtributos().size()) {
                     indexAtributosSelecionados.add(index);
@@ -338,14 +350,16 @@ public class SGBD {
             }
             else{
                 System.out.print("Deseja consultar o atributo-chave "+tabela.getNomeChave()+"? (s/n): ");
-                boolean consultar = SGBD.SCAN.next().startsWith("s");
+                input = SGBD.SCAN.next();
+                boolean consultar = input.startsWith("s") || input.startsWith("S");
                 if(consultar){
                     indexAtributosSelecionados.add(index);
                 }
                 for(Atributo atr : tabela.getAtributos()) {
                     index++;
                     System.out.print("Deseja consultar o atributo "+atr.getNome()+"? (s/n): ");
-                    consultar = SGBD.SCAN.next().startsWith("s");
+                    input = SGBD.SCAN.next();
+                    consultar = input.startsWith("s") || input.startsWith("S");
                     if(consultar){
                         indexAtributosSelecionados.add(index);
                     }
@@ -441,7 +455,8 @@ public class SGBD {
                 filtros = Filtro.menuCriacaoFiltros(tabela);
                 if(filtros.isEmpty()) {
                     System.out.print("[AVISO] Isso ira excluir todos os registro dessa tabela. Deseja prosseguir? (s/n): ");
-                    prosseguir = SGBD.SCAN.next().startsWith("s");
+                    String input = SGBD.SCAN.next();
+                    prosseguir = input.startsWith("s") || input.startsWith("S");
                 }
                 else {
                     prosseguir = true;
@@ -600,7 +615,8 @@ public class SGBD {
                             break;                            
                     }
                     System.out.print("Deseja fazer mais alguma modificação? (s/n): ");
-                    continuar = SCAN.next().startsWith("s");
+                    String input = SGBD.SCAN.next();
+                    continuar = input.startsWith("s") || input.startsWith("S");
                 }while(continuar);
             }
             finally {

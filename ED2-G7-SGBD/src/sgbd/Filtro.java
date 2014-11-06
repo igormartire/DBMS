@@ -73,7 +73,8 @@ public class Filtro {
         int index = -1;
         boolean criar = false;
         System.out.print("Deseja criar algum filtro? (s/n): ");
-        criar = SGBD.SCAN.next().startsWith("s");
+        String input = SGBD.SCAN.next();
+        criar = input.startsWith("s") || input.startsWith("S");
         if (criar){
             criar = false;
             do {
@@ -82,7 +83,8 @@ public class Filtro {
                 //Se já houver criado um filtro para este atributo, a mensagem fica:
                 //Deseja criar mais um filtro...?
                 System.out.print("Deseja criar "+(criar?"mais ":"")+"um filtro para o atributo-chave "+tabela.getNomeChave()+"? (s/n): ");
-                criar = SGBD.SCAN.next().startsWith("s");
+                input = SGBD.SCAN.next();
+                criar = input.startsWith("s") || input.startsWith("S");
                 if(criar){
                     Filtro f = menuCriacaoFiltro(index,Atributo.TIPO_INTEIRO);
                     filtros.add(f);
@@ -93,7 +95,8 @@ public class Filtro {
                 index++;
                 do {
                 System.out.print("Deseja criar "+(criar?"mais ":"")+"um filtro para o atributo "+atr.getNome()+"? (s/n): ");
-                criar = SGBD.SCAN.next().startsWith("s");            
+                input = SGBD.SCAN.next();
+                criar = input.startsWith("s") || input.startsWith("S");            
                     if(criar){
                         Filtro f = menuCriacaoFiltro(index,atr.getTipo());
                         filtros.add(f);
