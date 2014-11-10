@@ -418,7 +418,7 @@ public class ArvoreBMaisTest {
      * Testa inserção em árvore de altura H=2
      * Exige particionamento de uma página folha
      */
-    //@Test
+    @Test
     public void testaInsere3() throws FileNotFoundException, Exception {
         //Árvore tem um dos nós folha cheio. E é neste nó que a inserção ocorrerá
         montaArvoreH2Cheia();
@@ -469,7 +469,7 @@ public class ArvoreBMaisTest {
     /**
      * Testa inserção em árvore de altura H=2, chave do registro ja existe -- nao inserir
      */
-    //@Test
+    @Test
     public void testaInsere4() throws FileNotFoundException, Exception {
         montaArvoreH2();
 
@@ -510,7 +510,7 @@ public class ArvoreBMaisTest {
     /**
      * Testa inserção em árvore de altura H=1 cheia, que causa aumento na altura da árvore
      */
-    //@Test
+    @Test
     public void testaInsere5() throws FileNotFoundException, Exception {
         montaArvoreH1Cheia();
 
@@ -546,7 +546,7 @@ public class ArvoreBMaisTest {
      * Testa inserção em árvore de altura H=2 completa
      * Folha está cheia, e raiz também
      */
-    //@Test
+    @Test
     public void testaInsere6() throws FileNotFoundException, Exception {
         montaArvoreH2Completa();
 
