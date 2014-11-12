@@ -166,7 +166,7 @@ public class ArvoreBMais {
                 //Insere no pai a chave do primeiro cliente do novoNo
                 List<Integer> nosFolhaComPaisTrocados = insereEmArvoreB(novoNo.pontPai, novoNo.clientes.get(0).codCliente, endNovoNo, true, nomeArquivoMetadados, nomeArquivoIndice);
                 
-                //Se houve nós de índice com pais trocados, então atualiza o pai desses nós
+                //Se houve nós folha com pais trocados, então atualiza o pai desses nós
                 if (!nosFolhaComPaisTrocados.isEmpty()) {
                     int endNovoPai = nosFolhaComPaisTrocados.get(0);
                     for (int i = 1; i < nosFolhaComPaisTrocados.size(); i++) {
@@ -208,10 +208,150 @@ public class ArvoreBMais {
      * retorna ponteiro para a folha onde o registro foi excluido
      */
     public int exclui(int codCli, String nomeArquivoMetadados, String nomeArquivoIndice, String nomeArquivoDados) throws Exception {
-        //TODO: Inserir aqui o código do algoritmo de remoção
-        return Integer.MAX_VALUE;
+        ResultBusca resBusca = busca(codCli,nomeArquivoMetadados,nomeArquivoIndice,nomeArquivoDados);
+        if (!resBusca.encontrou) { //cliente não existe
+            return -1; 
+        }
+        else { //achou o cliente
+            
+            //Lê nó folha onde o cliente foi achado
+            RandomAccessFile dataFile = new RandomAccessFile(new File(nomeArquivoDados),"rw");
+            dataFile.seek(resBusca.pontFolha);
+            NoFolha no = NoFolha.le(dataFile);
+            
+            //Remove o cliente da folha
+            no.clientes.remove(resBusca.pos);
+            no.m--;
+            
+            //Se possui ao menos d clientes ou for raiz, entao basta salvar o no
+            if ((no.m >= NoFolha.d) || (no.pontPai == -1)) {
+                dataFile.seek(resBusca.pontFolha);
+                no.salva(dataFile);
+            }
+            else { //no.m < d e nao e raiz: concatenar ou redistribuir
+                /*
+                * Chegando-se aqui, sabemos o seguinte a respeito do no:
+                *  - No é folha e possui pai (pois nao e raiz)
+                *  - Tem ao menos 1 nó vizinho.
+                */
+                
+                //Pega os vizinhos
+                int pos = 0;
+                //Le o no pai
+                RandomAccessFile indexFile = new RandomAccessFile(new File(nomeArquivoIndice),"rw");
+                indexFile.seek(no.pontPai);
+                NoInterno W = NoInterno.le(indexFile);
+                //Acha a posicao do ponteiro para o filho do qual o cliente foi excluido
+                while ((pos < W.m) && (codCli >= W.chaves.get(pos))) {
+                    pos++;
+                }
+                //W.p.get(pos) é o ponteiro para o nó folha do qual o cliente foi excluido                
+                int pontNoVizEsq = pos-1; //se pos == 0, entao pontNoVizEsq == -1
+                int pontNoVizDir = (pos < W.m) ? pos+1 : -1;
+                //pontNoVizEsq/Dir == -1 significa que nao tem o vizinho da esquerda ou da direita
+                //Contudo, sabemos que um deles existe, pois o no folha tem que ter ao menos 1 vizinho
+                
+                //Define quem é P e Q
+                NoFolha vizEsq = null, vizDir = null;
+                int somaEsq = 0 , somaDir = 0, soma = 0;
+                if (pontNoVizEsq != -1) {
+                    pontNoVizEsq = W.p.get(pontNoVizEsq);
+                    dataFile.seek(pontNoVizEsq);
+                    vizEsq = NoFolha.le(dataFile);
+                    somaEsq = no.m + vizEsq.m;
+                }
+                if (pontNoVizDir != -1) {
+                    pontNoVizDir = W.p.get(pontNoVizDir);
+                    dataFile.seek(pontNoVizDir);
+                    vizDir = NoFolha.le(dataFile);
+                    somaDir = no.m + vizDir.m;
+                }
+                NoFolha P, Q;                
+                int posW; //posW e a posiçao da chave em W que fica entre os ponteiros para P e Q
+                if ((vizDir != null) && (somaDir >= somaEsq)) {
+                    //trabalharemos (concatenaçao ou redistribuiçao) com o vizinho direito
+                    P = no;
+                    Q = vizDir;
+                    posW = pos;
+                    soma = somaDir;
+                }
+                else { //trabalharemos (concatenaçao ou redistribuiçao) com o vizinho esquerdo
+                    P = vizEsq;
+                    Q = no;
+                    posW = pos-1;
+                    soma = somaEsq;
+                }
+                
+                //Faremos redistribuicao se a soma da quantidade de registros em P e Q for maior ou igual a 2*d
+                boolean redistribuicao = (soma >= 2*NoFolha.d);
+                
+                if(redistribuicao) {
+                    List<Cliente> concatClientes = new ArrayList<Cliente>();
+                    concatClientes.addAll(P.clientes);
+                    concatClientes.addAll(Q.clientes);
+                    //concatCliente ja esta com os clientes ordenados
+                    //Agora redistribuiremos os clientes entre P e Q
+                    //P fica com os primeiros d clientes
+                    //Q fica com o resto
+                    P.clientes = concatClientes.subList(0, NoFolha.d);
+                    P.m = NoFolha.d;
+                    Q.clientes = concatClientes.subList(NoFolha.d, soma);
+                    Q.m = soma - NoFolha.d;
+                    //Temos que atualizar a chave de indice posW para a chave do primeiro cliente de Q
+                    W.chaves.set(posW, Q.clientes.get(0).codCliente);
+                    //Salva nos folhas e o pai
+                    dataFile.seek(W.p.get(posW));
+                    P.salva(dataFile);
+                    dataFile.seek(W.p.get(posW+1));
+                    Q.salva(dataFile);
+                    indexFile.seek(P.pontPai);
+                    W.salva(indexFile);
+                }
+                else { //concatenacao
+                    //Passa todos os clientes de Q para P (já ficam ordenados)
+                    P.clientes.addAll(Q.clientes);
+                    P.m = P.clientes.size();
+                    
+                    //Atualiza lista encadeada
+                    P.pontProx = Q.pontProx;
+                    
+                    //Libera a folha Q (e atualiza os metadados)
+                    RandomAccessFile metaFile = new RandomAccessFile(new File(nomeArquivoMetadados), "rw");                    
+                    Metadados metadados = Metadados.le(metaFile);                    
+                    Q.pontProx = metadados.pontProxNoFolhaLivre;
+                    int pontP = W.p.get(posW);
+                    int pontQ = W.p.get(posW+1);
+                    metadados.pontProxNoFolhaLivre = pontQ;
+                    
+                    //Salva nos folhas e metadados
+                    dataFile.seek(pontP);
+                    P.salva(dataFile);
+                    dataFile.seek(pontQ);
+                    Q.salva(dataFile);
+                    metaFile.seek(0);
+                    metadados.salva(metaFile);
+                    
+                    //Exclui a chave de W de posição posW bem como o ponteiro de posição posW+1
+                    List<Integer> nosComPaisTrocados = excluiEmArvoreB(P.pontPai, posW, nomeArquivoMetadados, nomeArquivoIndice);
+                                        
+                    //Se houve nós com pais trocados, então atualiza o pai desses nós
+                    if (!nosComPaisTrocados.isEmpty()) {
+                        int endNovoPai = nosComPaisTrocados.get(0);
+                        for (int i = 1; i < nosComPaisTrocados.size(); i++) {
+                            int pontN = nosComPaisTrocados.get(i);
+                            dataFile.seek(pontN);
+                            NoFolha n = NoFolha.le(dataFile);
+                            n.pontPai = endNovoPai;
+                            dataFile.seek(pontN);
+                            n.salva(dataFile);
+                        }
+                    } 
+                }
+            }
+            return resBusca.pontFolha;
+        }
     }
-    
+        
     /**
      * Insere, no Nó de Índice de endereço especificado, a chave especificada e o ponteiro especificado
      * @param pontNo endereço do no de indice; -1 se for para criar um nó de índice que se tornará raiz
@@ -366,6 +506,193 @@ public class ArvoreBMais {
                 List<Integer> retorno = new ArrayList<Integer>();
                 retorno.add(endNovoNo);
                 retorno.addAll(novoNo.p);
+                return retorno;
+            }
+        }
+    }
+
+    /**
+     * Exclui a chave de posição posChave (incluindo o ponteiro de posição posChave+1) do nó de índices de posição pontNo no arquivo de índices.
+     * @param pontNo posição no arquivo de índices do nó do qual se deseja excluir a chave
+     * @param posChave posição da chave que se deseja excluir
+     * @param nomeArquivoMetadados nome do arquivo de metadados 
+     * @param nomeArquivoIndice nome do arquivo de indice (que contém os nós internos da arvore B+)
+     * @return retorna lista de endereços de nós cujo pontPai mudou para o endereço armazenado na posição 0 da lista retornada     *         
+     */
+    private List<Integer> excluiEmArvoreB(int pontNo, int posChave, String nomeArquivoMetadados, String nomeArquivoIndice) throws Exception {
+        
+        //Lê nó do qual deseja-se excluir a chave
+        RandomAccessFile indexFile = new RandomAccessFile(new File(nomeArquivoIndice),"rw");
+        indexFile.seek(pontNo);
+        NoInterno no = NoInterno.le(indexFile);
+        
+        //Remove a chave de posição posChave
+        int chaveExcluida = no.chaves.get(posChave);
+        no.chaves.remove(posChave);
+        no.p.remove(posChave+1);
+        no.m--;
+        
+        //Se for raiz e não tiver mais nenhum elemento, então tem que excluir este no (raiz)
+        if ((no.pontPai == -1) && (no.m == 0)) {
+            /*
+            * O nó só tem um filho, apontado por no.p.get(0)
+            * Esse filho se tornará a raiz
+            * Os metadados devem ser atualizados
+            */
+            //Lê metadados
+            RandomAccessFile metaFile = new RandomAccessFile(new File(nomeArquivoMetadados), "rw");                    
+            Metadados metadados = Metadados.le(metaFile);
+            //Exclui raiz
+            no.pontPai = metadados.pontProxNoInternoLivre;
+            metadados.pontProxNoInternoLivre = pontNo;
+            //Atualiza ponteiro pra raiz
+            metadados.pontRaiz = no.p.get(0);
+            metadados.raizFolha = no.apontaFolha;
+            //Salva no e metadados
+            indexFile.seek(pontNo);
+            no.salva(indexFile);
+            metaFile.seek(0);
+            metadados.salva(metaFile);
+            List<Integer> retorno = new ArrayList<Integer>();
+            retorno.add(-1);
+            retorno.add(metadados.pontRaiz);
+            return retorno;
+            
+        }
+        //Senão, se possui ao menos d chaves ou for raiz, entao basta salvar o no
+        else if ((no.m >= NoInterno.d) || (no.pontPai == -1)) {
+            indexFile.seek(pontNo);
+            no.salva(indexFile);
+            List<Integer> retorno = new ArrayList<Integer>();
+            return retorno;
+        }
+        else { //no.m < d e nao e raiz: concatenar ou redistribuir
+            /*
+            * Chegando-se aqui, sabemos o seguinte a respeito do no:
+            *  - Nó possui pai (pois não é raiz)
+            *  - Tem ao menos 1 nó vizinho.
+            */
+        
+            //Pega os vizinhos
+            int pos = 0;
+            //Le o no pai
+            indexFile.seek(no.pontPai);
+            NoInterno W = NoInterno.le(indexFile);
+            //Acha a posicao do ponteiro para o filho do qual a chave foi excluída
+            int algumaChaveDoFilho = no.chaves.get(0);
+            while ((pos < W.m) && (algumaChaveDoFilho >= W.chaves.get(pos))) {
+                pos++;
+            }
+            //W.p.get(pos) é o ponteiro para o nó do qual a chave foi excluída
+            int pontNoVizEsq = pos-1; //se pos == 0, entao pontNoVizEsq == -1
+            int pontNoVizDir = (pos < W.m) ? pos+1 : -1;
+            //pontNoVizEsq/Dir == -1 significa que nao tem o vizinho da esquerda ou da direita
+            //Contudo, sabemos que um deles existe, pois o nó tem que ter ao menos 1 vizinho
+
+            //Define quem é P e Q
+            NoInterno vizEsq = null, vizDir = null;
+            int somaEsq = 0 , somaDir = 0, soma = 0;
+            if (pontNoVizEsq != -1) {
+                pontNoVizEsq = W.p.get(pontNoVizEsq);
+                indexFile.seek(pontNoVizEsq);
+                vizEsq = NoInterno.le(indexFile);
+                somaEsq = no.m + vizEsq.m;
+            }
+            if (pontNoVizDir != -1) {
+                pontNoVizDir = W.p.get(pontNoVizDir);
+                indexFile.seek(pontNoVizDir);
+                vizDir = NoInterno.le(indexFile);
+                somaDir = no.m + vizDir.m;
+            }
+            NoInterno P, Q;                
+            int posW; //posW e a posiçao da chave em W que fica entre os ponteiros para P e Q
+            if ((vizDir != null) && (somaDir >= somaEsq)) {
+                //trabalharemos (concatenaçao ou redistribuiçao) com o vizinho direito
+                P = no;
+                Q = vizDir;
+                posW = pos;
+                soma = somaDir;
+            }
+            else { //trabalharemos (concatenaçao ou redistribuiçao) com o vizinho esquerdo
+                P = vizEsq;
+                Q = no;
+                posW = pos-1;
+                soma = somaEsq;
+            }
+
+            //Faremos redistribuicao se a soma da quantidade de chaves em P e Q for maior ou igual a 2*d
+            boolean redistribuicao = (soma >= 2*NoInterno.d);
+
+            if(redistribuicao) {
+                
+                if (P.m < NoInterno.d) { //é P que está precisando de chaves de Q
+                    P.chaves.add(W.chaves.get(posW));
+                    P.m++;
+                    W.chaves.set(posW, Q.chaves.remove(0));
+                    Q.m--;
+                    P.p.add(Q.p.remove(0));                  
+                }
+                else { //Q.m < NoInterno.d; é Q que está precisando de chaves de Q
+                    Q.chaves.add(0,W.chaves.get(posW));
+                    Q.m++;
+                    W.chaves.set(posW, P.chaves.remove(P.m-1));
+                    P.m--;
+                    Q.p.add(0,P.p.remove(P.m+1));
+                }
+                                
+                //Salva nós e o pai
+                indexFile.seek(W.p.get(posW));
+                P.salva(indexFile);
+                indexFile.seek(W.p.get(posW+1));
+                Q.salva(indexFile);
+                indexFile.seek(P.pontPai);
+                W.salva(indexFile);
+                List<Integer> retorno = new ArrayList<Integer>();
+                return retorno; 
+            }
+            else { //concatenacao
+                
+                //Adiciona a chave de W que separa P e Q em P e adiciona tudo de Q em P.
+                P.chaves.add(W.chaves.get(posW));
+                P.chaves.addAll(Q.chaves);
+                P.p.addAll(Q.p);
+                P.m = P.chaves.size();
+                
+                //Libera o nó Q (e atualiza os metadados)
+                RandomAccessFile metaFile = new RandomAccessFile(new File(nomeArquivoMetadados), "rw");                    
+                Metadados metadados = Metadados.le(metaFile);                    
+                Q.pontPai = metadados.pontProxNoInternoLivre;
+                int pontP = W.p.get(posW);
+                int pontQ = W.p.get(posW+1);
+                metadados.pontProxNoInternoLivre = pontQ;
+
+                //Salva nos folhas e metadados
+                indexFile.seek(pontP);
+                P.salva(indexFile);
+                indexFile.seek(pontQ);
+                Q.salva(indexFile);
+                metaFile.seek(0);
+                metadados.salva(metaFile);
+
+                //Exclui a chave de W de posição posW bem como o ponteiro de posição posW+1
+                List<Integer> nosComPaisTrocados = excluiEmArvoreB(P.pontPai, posW, nomeArquivoMetadados, nomeArquivoIndice);
+                
+                //Se houve nós de índice com pais trocados, então atualiza o pai desses nós
+                if (!nosComPaisTrocados.isEmpty()) {
+                    int endNovoPai = nosComPaisTrocados.get(0);
+                    for (int i = 1; i < nosComPaisTrocados.size(); i++) {
+                        int pontN = nosComPaisTrocados.get(i);
+                        indexFile.seek(pontN);
+                        NoInterno n = NoInterno.le(indexFile);
+                        n.pontPai = endNovoPai;
+                        indexFile.seek(pontN);
+                        n.salva(indexFile);
+                    }
+                }
+                
+                List<Integer> retorno = new ArrayList<Integer>();
+                retorno.add(pontP);
+                retorno.addAll(Q.p);
                 return retorno;
             }
         }

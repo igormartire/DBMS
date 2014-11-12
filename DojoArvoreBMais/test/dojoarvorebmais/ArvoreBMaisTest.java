@@ -655,11 +655,72 @@ public class ArvoreBMaisTest {
     }
 
     /**
-     * Testa exclusão em árvore de altura H=2
+     * Testa exclusão em árvore de altura H=3
      * É necessário concatenação
+     * OBS.: Modifiquei este teste porque o anterior estava errado: não causava concatenação.
      */
     @Test
-    public void testaExclui2() throws FileNotFoundException, Exception {        
+    public void testaExclui2() throws FileNotFoundException, Exception { 
+        montaArvoreH3();
+        
+        int end = instance.exclui(25, NOME_ARQUIVO_METADADOS, NOME_ARQUIVO_INDICE, NOME_ARQUIVO_DADOS);
+        assertEquals(2*NoFolha.TAMANHO, end);
+        
+        tabDados = new ArrayList<NoFolha>();
+        tabIndice = new ArrayList<NoInterno>();
+        
+        tabMetadados = new Metadados(1*NoInterno.TAMANHO,false,0*NoInterno.TAMANHO, 2*NoFolha.TAMANHO);
+        //Estrutura do No Interno: m, apontaFolha, pontPai, Lista de ponteiros, Lista de Chaves
+        //ATENCAO: os ponteiros são absolutos
+        tabIndice.add(new NoInterno(0, false, 2*NoInterno.TAMANHO, Arrays.asList(1*NoInterno.TAMANHO), new ArrayList<Integer>()));
+        tabIndice.add(new NoInterno(4, true, -1, Arrays.asList(0, 1*NoFolha.TAMANHO, 3*NoFolha.TAMANHO, 4*NoFolha.TAMANHO, 5*NoFolha.TAMANHO), Arrays.asList(15, 37,39,55)));
+        tabIndice.add(new NoInterno(2, true, 3*NoInterno.TAMANHO, Arrays.asList(3*NoFolha.TAMANHO, 4*NoFolha.TAMANHO, 5*NoFolha.TAMANHO), Arrays.asList(39, 55)));
+
+        List<Cliente> clientes = new ArrayList<Cliente>();
+        clientes.add(new Cliente(10,"JOAO      "));
+        clientes.add(new Cliente(13,"ANA MARIA "));
+        //Estrutura do nó folha: m, pontPai, pontProx, registros de clientes
+        tabDados.add(new NoFolha(2,1 * NoInterno.TAMANHO, 1*NoFolha.TAMANHO,clientes));
+
+        clientes = new ArrayList<Cliente>();
+        clientes.add(new Cliente(15,"JOSE      "));
+        clientes.add(new Cliente(20,"MARIANA   "));
+        clientes.add(new Cliente(35,"MARCELA   "));
+        //Estrutura do nó folha: m, pontPai, pontProx, registros de clientes
+        tabDados.add(new NoFolha(3, 1 * NoInterno.TAMANHO, 3*NoFolha.TAMANHO,clientes));
+
+        clientes = new ArrayList<Cliente>();        
+        clientes.add(new Cliente(35,"MARCELA   "));
+        //Estrutura do nó folha: m, pontPai, pontProx, registros de clientes
+        tabDados.add(new NoFolha(1, 1 * NoInterno.TAMANHO, 6*NoFolha.TAMANHO,clientes));
+
+        clientes = new ArrayList<Cliente>();
+        clientes.add(new Cliente(37,"LEONARDO  "));
+        clientes.add(new Cliente(38,"KARLA     "));
+        //Estrutura do nó folha: m, pontPai, pontProx, registros de clientes
+        tabDados.add(new NoFolha(2, 1 * NoInterno.TAMANHO, 4*NoFolha.TAMANHO,clientes));
+
+        clientes = new ArrayList<Cliente>();
+        clientes.add(new Cliente(39,"MARIO     "));
+        clientes.add(new Cliente(50,"RICARDO   "));
+        //Estrutura do nó folha: m, pontPai, pontProx, registros de clientes
+        tabDados.add(new NoFolha(2, 1 * NoInterno.TAMANHO, 5*NoFolha.TAMANHO,clientes));
+
+        clientes = new ArrayList<Cliente>();
+        clientes.add(new Cliente(55,"ROSA      "));
+        clientes.add(new Cliente(60,"MICHELE   "));
+        clientes.add(new Cliente(70,"RAFAEL    "));
+        //Estrutura do nó folha: m, pontPai, pontProx, registros de clientes
+        tabDados.add(new NoFolha(3, 1 * NoInterno.TAMANHO, -1,clientes));
+        
+        tabMetadadosSaida = Arquivos.leMetadadosArvoreBMais(NOME_ARQUIVO_METADADOS);
+        tabIndiceSaida = Arquivos.leNosInternos(NOME_ARQUIVO_INDICE);
+        tabDadosSaida = Arquivos.leNosFolha(NOME_ARQUIVO_DADOS);
+
+        assertArrayEquals(tabDados.toArray(), tabDadosSaida.toArray());
+        assertArrayEquals(tabIndice.toArray(), tabIndiceSaida.toArray());
+        
+        /* Antigo: Não causa concatenação. Ao excluir o cliente 20, na verdade aconteceria redistribuição com o vizinho da direita
         montaArvoreH2();
 
         int end = instance.exclui(20, NOME_ARQUIVO_METADADOS, NOME_ARQUIVO_INDICE, NOME_ARQUIVO_DADOS);
@@ -678,11 +739,12 @@ public class ArvoreBMaisTest {
         tabDados.add(new NoFolha(3, 0, 2*NoFolha.TAMANHO, clientes));
 
         //Este nó agora é lixo. Dependendo da implementação, tem que mudar este código de teste.
+        //Eu mudei o pontProx para o próximo endereço livre após este.
         clientes = new ArrayList<Cliente>();
         clientes.add(new Cliente(15,"JOSE      "));
         clientes.add(new Cliente(20,"MARIANA   "));
         //Estrutura do nó folha: m, pontPai, pontProx, registros de clientes
-        tabDados.add(new NoFolha(2, 0, 2*NoFolha.TAMANHO, clientes));
+        tabDados.add(new NoFolha(2, 0, 3*NoFolha.TAMANHO, clientes));
 
         clientes = new ArrayList<Cliente>();
         clientes.add(new Cliente(25,"RONALDO   "));
@@ -696,6 +758,7 @@ public class ArvoreBMaisTest {
 
         assertArrayEquals(tabDados.toArray(), tabDadosSaida.toArray());
         assertArrayEquals(tabIndice.toArray(), tabIndiceSaida.toArray());
+        */
     }
     
     /**
